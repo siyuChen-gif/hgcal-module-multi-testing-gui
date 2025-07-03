@@ -21,7 +21,7 @@ class Display:
     # === Windows Display ========================================
     # ============================================================
 
-    def do_something_window(instruction: str, button: str, title=None, can_end=False):
+    def do_something_window(self, instruction: str, button: str, title=None, can_end=False):
         """
         Function which opens a window which tells the user to do something and has a button which is pressed once they've 
         done the thing. It has the option to allow the user to end the session instead of continuing, which when pressed
@@ -48,7 +48,7 @@ class Display:
         window.close()
         return ret
 
-    def waiting_window(message: str, title=None, description=None):
+    def waiting_window(self, message: str, title=None, description=None):
         """
         Function which opens a window when the GUI is handling something automatically and the user has to wait.
         """     
@@ -63,7 +63,7 @@ class Display:
         event, values = window.read(timeout=100)
         return window
 
-    def check_window(self, info: str):
+    def check_window(self, info: str):  # haven't test yet
         """
         Function which opens a window for user to check the input is correct or not.
         """
@@ -171,8 +171,8 @@ class Display:
         all_teststands_setup = []
         all_teststands_keys = []
 
-        for teststand_no in range(MAX_TESTSTAND_NUM):
-            single_teststand_setup, single_teststand_keys = self.setup_single_teststand(teststand_no+1)
+        for teststand_no in range(1, MAX_TESTSTAND_NUM+1):
+            single_teststand_setup, single_teststand_keys = self.setup_single_teststand(teststand_no)
             all_teststands_setup.append(single_teststand_setup)
             all_teststands_keys.extend(single_teststand_keys)
 
@@ -184,13 +184,13 @@ class Display:
     # ============================================================
 
     # Functions for current state status indicators
-    def LEDIndicator(key=None, radius=30):
+    def LEDIndicator(self, key=None, radius=30):
         return sg.Graph(canvas_size=(radius, radius),
                         graph_bottom_left=(-radius, -radius),
                         graph_top_right=(radius, radius),
                         pad=(0, 0), key=key, visible=True)
 
-    def SetLED(window, key, color, empty=False):
+    def SetLED(self, window, key, color, empty=False):
         graph = window[key]
         graph.erase()
         if not empty:
