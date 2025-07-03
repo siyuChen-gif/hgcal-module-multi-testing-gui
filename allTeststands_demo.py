@@ -1,7 +1,6 @@
 import yaml
 import PySimpleGUI as sg
 from InteractionGUI.display import Display
-from InteractionGUI.interaction import HumanInteraction
 from InteractionGUI.handle_process import SetUpGUI
 
 configuration = {}
@@ -32,9 +31,6 @@ sg.theme('cmutheme')
 
 # Initialize the class
 display = Display()
-setup = SetUpGUI()
-human_interact = HumanInteraction()
-
 
 # Initialize the basewindow
 teststand_display, _ = display.setup_all_teststands()
@@ -44,26 +40,36 @@ layout = [[teststand_display],
           [sg.Button("Exit")]]
 
 basewindow = sg.Window("Test Teststand Display", layout, resizable=True, finalize=True)
-setup.disable_all_teststands_setup(basewindow)
 
+setup = SetUpGUI(basewindow)
+setup.disable_all_teststands()
 
 # start the event loop
 while True:
     event, values = basewindow.read()
+
     if event == sg.WINDOW_CLOSED or event == "Exit":
         break
+
     elif event == "Enable ALL":
-        human_interact.enable_all_teststands_setup(basewindow)
-        setup.check_all_teststands_checkboxs(basewindow)
+        setup.enable_all_teststands()
+        setup.check_all_teststands_checkboxs()
     elif event == "Disable ALL":
-        human_interact.disable_all_teststands_setup(basewindow)
-        setup.uncheck_all_teststands_checkboxs(basewindow)
+        setup.disable_all_teststands()
+        setup.uncheck_all_teststands_checkboxs()
+
     elif event.startswith('-TESTSTAND-'):
-        ts_id = int(event.split('-')[2])
-        is_checked = values[event]
+        ts_id       = int(event.split('-')[2])
+        is_checked  = values[event]
         if is_checked:
-            human_interact.enable_one_teststand_setup(basewindow, ts_id)
+            setup.enable_one_teststand(ts_id)
         else:
-            human_interact.disable_one_teststand_setup(basewindow, ts_id)
+            setup.disable_one_teststand(ts_id)
+    
+    elif event.startswith('-CLEAR-'):
+        ts_id       = int(event.split('-')[2])
+        module_id   = int(event.split('-')[3])
+        key         = f"-Scanned-QR-Code-{ts_id}-{module_id}-"
+        setup.clear_scanned_qr_code(key)
 
 basewindow.close()

@@ -82,9 +82,9 @@ class Display:
         while True:
             event, values = window.read()
 
-            if event == "Return Last Step":
-                ret = 'TERM'
-            elif event == "Continue" or event == sg.WIN_CLOSED:
+            if event == "Return Last Step" or event == sg.WIN_CLOSED:
+                break
+            elif event == "Continue":
                 ret = 'CONT'
 
         return ret
@@ -180,7 +180,7 @@ class Display:
     
 
     # ============================================================
-    # === Buttons Display ========================================
+    # === LEDs Display ===========================================
     # ============================================================
 
     # Functions for current state status indicators
@@ -189,11 +189,3 @@ class Display:
                         graph_bottom_left=(-radius, -radius),
                         graph_top_right=(radius, radius),
                         pad=(0, 0), key=key, visible=True)
-
-    def SetLED(self, window, key, color, empty=False):
-        graph = window[key]
-        graph.erase()
-        if not empty:
-            graph.draw_circle((0, 0), 12, fill_color=color, line_color=color)
-        else:
-            graph.draw_circle((0, 0), 12, fill_color=None, line_color=color)
