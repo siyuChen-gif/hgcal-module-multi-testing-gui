@@ -1,5 +1,5 @@
-import PySimpleGUI as sg
 import yaml
+import PySimpleGUI as sg
 
 """
 This file contains the class that contain functions for displaying features to user.
@@ -94,55 +94,91 @@ class Display:
     # === Texts Display ==========================================
     # ============================================================
 
-    def setup_qr_code_input(self, teststand_no: int) -> list:
+    def setup_qr_code_input(self, teststand_no: int):
         """Set up layout for QR Code input
         """
         qr_code_input = []
+        keys = []
         
         for module_no in range(MAX_MODULE_NUM):
-            arg = sg.Input(s=20, key=f'-Scanned-QR-Code-{teststand_no}-{module_no}-', enable_events=True)
+            # set up keys
+            key = f'-Scanned-QR-Code-{teststand_no}-{module_no}-'
+            keys.append(key)
+
+            # set up input area
+            arg = sg.Input(s=20, key=key, enable_events=True)
             qr_code_input.append(arg)
         
-        return qr_code_input
+        return qr_code_input, keys
     
-    def setup_teststand_buttons(self, teststand_no: int) -> list:
+    def setup_teststand_buttons(self, teststand_no: int):
         """Set up buttons for 1 teststand.
         """
-        buttons = []
+        buttons = [sg.Text('                        ')]
+        keys = []
+
         for module_no in range(MAX_MODULE_NUM):
-            buttons.append(sg.Button('Clear', key=f'-CLEAR-{teststand_no}-{module_no}-'))
-            buttons.append(sg.Button('Manual Input', key=f'-ManualInput-{teststand_no}-{module_no}-'))
-        return buttons
+            # set up keys
+            clear_key = f'-CLEAR-{teststand_no}-{module_no}-'
+            manually_input_key = f'-ManualInput-{teststand_no}-{module_no}-'
+            keys.append(clear_key)
+            keys.append(manually_input_key)
+
+            # set up buttons
+            buttons.append(sg.Button('Clear', key=clear_key))
+            buttons.append(sg.Button('Manually Input', key=manually_input_key))
+            buttons.append(sg.Text('    '))
+
+        return buttons, keys
+    
+    def setup_teststand_ip(self, teststand_no: int):
+        """Set up selection area for teststand ips.
+        """
+        key = f"-FPGAHostname-{teststand_no}-"
+        arg = [sg.Text("Test Stand IP: "), 
+               sg.Combo(configuration['FPGAHostname'], 
+                    default_value=configuration['FPGAHostname'][(teststand_no-1)],  # `teststand_no` starts by 1
+                    key=key)]
+        
+        return arg, [key]
 
     def setup_single_teststand(self, teststand_no: int):
         """Set up single teststand layout.
         """
-        qr_code_input = self.setup_qr_code_input(teststand_no)
-        buttons = self.setup_teststand_buttons(teststand_no)
+        qr_code_input, qr_code_input_keys = self.setup_qr_code_input(teststand_no)
+        buttons, buttons_keys = self.setup_teststand_buttons(teststand_no)
+        ip_arg, ip_key = self.setup_teststand_ip(teststand_no)
 
-        # set up rows
+        single_teststand_keys = []
+
+        # set up rows and teststand_setup
         row1 = [sg.Checkbox(f'Teststand {teststand_no}', key=f'-TESTSTAND-{teststand_no}-', enable_events=True, default = False)] + qr_code_input
-        row2 = [sg.Text("Test Stand IP: "), 
-                sg.Combo(configuration['FPGAHostname'], 
-                    default_value=configuration['FPGAHostname'][(teststand_no)], 
-                    key=f"-FPGAHostname-{teststand_no}-")]+ buttons
+        row2 = buttons
+        row3 = [sg.Text('  ')] + ip_arg
 
-        teststand_setup = [row1, row2]
+        teststand_setup = [row1, row2, row3]
 
-        return sg.Frame('', teststand_setup)
+        # set up keys
+        single_teststand_keys.extend(qr_code_input_keys)
+        single_teststand_keys.extend(buttons_keys)
+        single_teststand_keys.extend(ip_key)
+
+        return [sg.Frame('', teststand_setup)], single_teststand_keys
     
     def setup_all_teststands(self, visible=True):
         """Set up the teststands layout.
         """
-        all_teststands = []
+        all_teststands_setup = []
+        all_teststands_keys = []
 
         for teststand_no in range(MAX_TESTSTAND_NUM):
-            single_teststand = self.setup_single_teststand(teststand_no)
-            all_teststands.append([single_teststand])
+            single_teststand_setup, single_teststand_keys = self.setup_single_teststand(teststand_no+1)
+            all_teststands_setup.append(single_teststand_setup)
+            all_teststands_keys.extend(single_teststand_keys)
 
-        return sg.Frame('TestStands Setup', layout=all_teststands, visible=visible)
+        return sg.Frame('TestStands Setup', layout=all_teststands_setup, visible=visible), all_teststands_keys
     
-    
+
     # ============================================================
     # === Buttons Display ========================================
     # ============================================================
