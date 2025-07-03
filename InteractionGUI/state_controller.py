@@ -43,6 +43,9 @@ class StateController:
                 self.window[key].update('')
             except Exception as e:
                 raise
+    
+    def set_visibility(self, key, visible=True):
+        self.window[key].update(visible=visible)
 
     def set_led(self, key, color='green', empty=False):
         """Set LED color on a Graph element."""

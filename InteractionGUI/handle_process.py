@@ -49,5 +49,9 @@ class SetUpGUI:
     """ Functions for clear the Scan QR Code input """
     def clear_scanned_qr_code(self, key):
         self.state.update_value(key, '')
-
     
+    """ Function for displaying/hiding the entire Teststand Setup section """
+    def show_teststands_setup(self):
+        self.state.set_visibility('-TESTSTAND-FRAME-', True)
+    def hide_teststands_setup(self):
+        self.state.set_visibility('-TESTSTAND-FRAME-', False)

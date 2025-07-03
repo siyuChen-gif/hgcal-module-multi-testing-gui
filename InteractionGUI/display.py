@@ -165,7 +165,7 @@ class Display:
 
         return [sg.Frame('', teststand_setup)], single_teststand_keys
     
-    def setup_all_teststands(self, visible=True):
+    def setup_all_teststands(self):
         """Set up the teststands layout.
         """
         all_teststands_setup = []
@@ -176,7 +176,7 @@ class Display:
             all_teststands_setup.append(single_teststand_setup)
             all_teststands_keys.extend(single_teststand_keys)
 
-        return sg.Frame('TestStands Setup', layout=all_teststands_setup, visible=visible), all_teststands_keys
+        return sg.Frame('TestStands Setup', layout=all_teststands_setup, key='-TESTSTAND-FRAME-', visible=True), all_teststands_keys
     
 
     # ============================================================

@@ -36,10 +36,15 @@ display = Display()
 teststand_display, _ = display.setup_all_teststands()
 
 layout = [[teststand_display],
-          [sg.Button("Enable ALL"), sg.Button("Disable ALL")],
-          [sg.Button("Exit")]]
+          [sg.Button("Enable ALL"), 
+           sg.Button("Disable ALL"),
+           sg.Button("Display ALL"),
+           sg.Button("Hide ALL"),
+           sg.Push(),
+           sg.Button("Exit")]]
 
 basewindow = sg.Window("Test Teststand Display", layout, resizable=True, finalize=True)
+basewindow.maximize()
 
 setup = SetUpGUI(basewindow)
 setup.disable_all_teststands()
@@ -71,5 +76,11 @@ while True:
         module_id   = int(event.split('-')[3])
         key         = f"-Scanned-QR-Code-{ts_id}-{module_id}-"
         setup.clear_scanned_qr_code(key)
+    
+    elif event == "Display ALL":
+        setup.show_teststands_setup()
+    elif event == "Hide ALL":
+        setup.hide_teststands_setup()
+
 
 basewindow.close()
