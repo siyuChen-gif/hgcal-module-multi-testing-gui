@@ -1,10 +1,14 @@
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import yaml
 import PySimpleGUI as sg
 from InteractionGUI.display import Display
 from InteractionGUI.handle_process import SetUpGUI
 
 configuration = {}
-with open('configuration.yaml', 'r') as file:
+with open('../configuration.yaml', 'r') as file:
     configuration = yaml.safe_load(file)
 
 # Create theme

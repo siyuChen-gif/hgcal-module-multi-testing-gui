@@ -10,7 +10,7 @@ MAX_TESTSTAND_NUM = 8
 MAX_MODULE_NUM = 3
 
 configuration = {}
-with open('configuration.yaml', 'r') as file:
+with open('../configuration.yaml', 'r') as file:
     configuration = yaml.safe_load(file)
 
 class Display:
