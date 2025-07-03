@@ -114,7 +114,7 @@ class Display:
     def setup_teststand_buttons(self, teststand_no: int):
         """Set up buttons for 1 teststand.
         """
-        buttons = [sg.Text('                        ')]
+        buttons = [sg.Text('                         ')]
         keys = []
 
         for module_no in range(MAX_MODULE_NUM):
@@ -127,7 +127,7 @@ class Display:
             # set up buttons
             buttons.append(sg.Button('Clear', key=clear_key))
             buttons.append(sg.Button('Manually Input', key=manually_input_key))
-            buttons.append(sg.Text('    '))
+            buttons.append(sg.Text(''))
 
         return buttons, keys
     
@@ -163,18 +163,37 @@ class Display:
         single_teststand_keys.extend(buttons_keys)
         single_teststand_keys.extend(ip_key)
 
-        return [sg.Frame('', teststand_setup)], single_teststand_keys
+        return sg.Frame('', teststand_setup), single_teststand_keys
     
-    def setup_all_teststands(self):
+    def setup_all_teststands(self, is_vertical=True, MAX_COLUMNS=2):
         """Set up the teststands layout.
         """
         all_teststands_setup = []
         all_teststands_keys = []
+        single_frames = []
 
         for teststand_no in range(1, MAX_TESTSTAND_NUM+1):
             single_teststand_setup, single_teststand_keys = self.setup_single_teststand(teststand_no)
-            all_teststands_setup.append(single_teststand_setup)
+
             all_teststands_keys.extend(single_teststand_keys)
+            single_frames.append(single_teststand_setup)
+        
+        if is_vertical:
+            num_rows = (len(single_frames) + MAX_COLUMNS - 1) // MAX_COLUMNS
+            for row in range(num_rows):
+                this_row = []   # initialize the row
+
+                for col in range(MAX_COLUMNS):
+                    index = row + col * num_rows    # calculate the index of the current frame (column first)
+
+                    if index < len(single_frames):  # avoid not-existing frame
+                        this_row.append(single_frames[index])
+
+                all_teststands_setup.append(this_row) 
+
+        else:
+            for i in range(0, len(single_frames), MAX_COLUMNS):
+                all_teststands_setup.append(single_frames[i:i + MAX_COLUMNS])
 
         return sg.Frame('TestStands Setup', layout=all_teststands_setup, key='-TESTSTAND-FRAME-', visible=True), all_teststands_keys
     
