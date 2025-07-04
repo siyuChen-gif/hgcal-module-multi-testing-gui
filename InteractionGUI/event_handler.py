@@ -13,6 +13,7 @@ class GUIEventHandler:
             "Display ALL": self.handle_display_all,
             "Hide ALL": self.handle_hide_all,
         }
+        # The above event map is currently for demonstration purposes only.
 
     # ============================================================
     # === API  ===================================================
@@ -33,7 +34,7 @@ class GUIEventHandler:
         elif event.startswith('-CLEAR-'):
             self.handle_clear(event)
 
-        """ More elifs here for future cases... """
+        """ More elifs here for future usage... """
     
 
     # ============================================================
@@ -58,19 +59,19 @@ class GUIEventHandler:
         """
         checkbox key: '-TESTSTAND-{teststand_no}-'
         """
-        ts_no = int(event.split('-')[2])
+        teststand_no = int(event.split('-')[2])
         is_checked = values[event]
         if is_checked:
-            self.setup.enable_one_teststand(ts_no)
+            self.setup.enable_one_teststand(teststand_no)
         else:
-            self.setup.disable_one_teststand(ts_no)
+            self.setup.disable_one_teststand(teststand_no)
 
     def handle_clear(self, event):
         """
         clear button key:   '-CLEAR-{teststand_no}-{module_no}-'
         input box key:      '-Scanned-QR-Code-{teststand_no}-{module_no}-'
         """
-        ts_no     = int(event.split('-')[2])
+        teststand_no     = int(event.split('-')[2])
         module_no = int(event.split('-')[3])
-        key       = f"-Scanned-QR-Code-{ts_no}-{module_no}-"
+        key       = f"-Scanned-QR-Code-{teststand_no}-{module_no}-"
         self.setup.clear_scanned_qr_code(key)

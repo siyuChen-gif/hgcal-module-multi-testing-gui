@@ -94,7 +94,7 @@ class Display:
     # === Texts Display ==========================================
     # ============================================================
 
-    def setup_qr_code_input(self, teststand_no: int):
+    def _setup_qr_code_input(self, teststand_no):
         """Set up layout for QR Code input
         """
         qr_code_input = []
@@ -111,7 +111,7 @@ class Display:
         
         return qr_code_input, keys
     
-    def setup_teststand_buttons(self, teststand_no: int):
+    def _setup_teststand_buttons(self, teststand_no):
         """Set up buttons for 1 teststand.
         """
         buttons = [sg.Text('                         ')]
@@ -120,7 +120,7 @@ class Display:
         for module_no in range(MAX_MODULE_NUM):
             # set up keys
             clear_key = f'-CLEAR-{teststand_no}-{module_no}-'
-            manually_input_key = f'-ManualInput-{teststand_no}-{module_no}-'
+            manually_input_key = f'-ManualInput-{teststand_no}-{module_no}-'    # maybe we should replace it as moudle/hxb info
             keys.append(clear_key)
             keys.append(manually_input_key)
 
@@ -131,7 +131,7 @@ class Display:
 
         return buttons, keys
     
-    def setup_teststand_ip(self, teststand_no: int):
+    def _setup_teststand_ip(self, teststand_no):
         """Set up selection area for teststand ips.
         """
         key = f"-FPGAHostname-{teststand_no}-"
@@ -142,12 +142,12 @@ class Display:
         
         return arg, [key]
 
-    def setup_single_teststand(self, teststand_no: int):
+    def setup_single_teststand(self, teststand_no):
         """Set up single teststand layout.
         """
-        qr_code_input, qr_code_input_keys = self.setup_qr_code_input(teststand_no)
-        buttons, buttons_keys = self.setup_teststand_buttons(teststand_no)
-        ip_arg, ip_key = self.setup_teststand_ip(teststand_no)
+        qr_code_input, qr_code_input_keys = self._setup_qr_code_input(teststand_no)
+        buttons, buttons_keys = self._setup_teststand_buttons(teststand_no)
+        ip_arg, ip_key = self._setup_teststand_ip(teststand_no)
 
         single_teststand_keys = []
 

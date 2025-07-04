@@ -15,6 +15,11 @@ class StateController:
         except Exception as e:
             raise
     
+    def update_all_value(self, keys, value):
+        """Update value of multiple GUI elements."""
+        for key in keys:
+            self.update_value(key, value)
+    
     def get_value(self, key):
         """Get value of a GUI element."""
         try:
@@ -28,6 +33,10 @@ class StateController:
             self.window[key].update(disabled=False)
         except Exception as e:
             raise
+    
+    def enable_all(self, keys):
+        for key in keys:
+            self.enable(key)
 
     def disable(self, key):
         """Disable a GUI element."""
@@ -35,6 +44,10 @@ class StateController:
             self.window[key].update(disabled=True)
         except Exception as e:
             raise
+    
+    def disable_all(self, keys):
+        for key in keys:
+            self.disable(key)
 
     def clear_inputs(self, keys):
         """Clear text inputs."""
