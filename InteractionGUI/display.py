@@ -141,6 +141,30 @@ class Display:
                     key=key)]
         
         return arg, [key]
+    
+    def _assign_layout(self, elements, is_vertical, MAX_COLUMNS):
+        """Assign layout for given elements by given conditions.
+        """
+        layout = []
+
+        if is_vertical:
+            num_rows = (len(elements) + MAX_COLUMNS - 1) // MAX_COLUMNS
+            for row in range(num_rows):
+                this_row = []   # initialize the row
+
+                for col in range(MAX_COLUMNS):
+                    index = row + col * num_rows    # calculate the index of the current frame (column first)
+
+                    if index < len(elements):  # avoid not-existing frame
+                        this_row.append(elements[index])
+
+                layout.append(this_row) 
+
+        else:
+            for i in range(0, len(elements), MAX_COLUMNS):
+                layout.append(elements[i:i + MAX_COLUMNS])
+        
+        return layout
 
     def setup_single_teststand(self, teststand_no):
         """Set up single teststand layout.
@@ -178,22 +202,7 @@ class Display:
             all_teststands_keys.extend(single_teststand_keys)
             single_frames.append(single_teststand_setup)
         
-        if is_vertical:
-            num_rows = (len(single_frames) + MAX_COLUMNS - 1) // MAX_COLUMNS
-            for row in range(num_rows):
-                this_row = []   # initialize the row
-
-                for col in range(MAX_COLUMNS):
-                    index = row + col * num_rows    # calculate the index of the current frame (column first)
-
-                    if index < len(single_frames):  # avoid not-existing frame
-                        this_row.append(single_frames[index])
-
-                all_teststands_setup.append(this_row) 
-
-        else:
-            for i in range(0, len(single_frames), MAX_COLUMNS):
-                all_teststands_setup.append(single_frames[i:i + MAX_COLUMNS])
+        all_teststands_setup = self._assign_layout(single_frames, is_vertical, MAX_COLUMNS)
 
         return sg.Frame('TestStands Setup', layout=all_teststands_setup, key='-TESTSTAND-FRAME-', visible=True), all_teststands_keys
     
