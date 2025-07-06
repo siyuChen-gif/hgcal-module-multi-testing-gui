@@ -2,7 +2,7 @@ import sys
 import PySimpleGUI as sg
 from Keithley2410 import Keithley2410
 from time import sleep, time
-from InteractionGUI import *
+from InteractionGUI_old import *
 import yaml
 from datetime import datetime, timedelta
 

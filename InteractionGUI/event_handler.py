@@ -1,11 +1,11 @@
-from InteractionGUI.gui_setup import SetUpGUI
+from InteractionGUI.setup import GUISetUp
 
 class GUIEventHandler:
     """
     This class contains all the functions that will be auto used to handle the events of the BaseGUI window.
     """
     def __init__(self, window):
-        self.setup = SetUpGUI(window)
+        self.setup = GUISetUp(window)
         # The below function map is used to map the event name that does not have any patterns to the corresponding handler function.
         self.event_map = {
             "Enable ALL": self.handle_enable_all,
@@ -59,8 +59,9 @@ class GUIEventHandler:
         """
         checkbox key: '-TESTSTAND-{teststand_no}-'
         """
-        teststand_no = int(event.split('-')[2])
-        is_checked = values[event]
+        teststand_no, _ = self.get_no_from_event(event)
+        is_checked = values.get(event)
+
         if is_checked:
             self.setup.enable_one_teststand(teststand_no)
         else:
@@ -71,7 +72,28 @@ class GUIEventHandler:
         clear button key:   '-CLEAR-{teststand_no}-{module_no}-'
         input box key:      '-Scanned-QR-Code-{teststand_no}-{module_no}-'
         """
-        teststand_no     = int(event.split('-')[2])
-        module_no = int(event.split('-')[3])
+        teststand_no, module_no = self.get_no_from_event(event)
         key       = f"-Scanned-QR-Code-{teststand_no}-{module_no}-"
+
         self.setup.clear_scanned_qr_code(key)
+
+
+    # ============================================================
+    # === Helper Functions  ======================================
+    # ============================================================
+
+    def get_no_from_event(self, event):
+        """Helper function to extract the teststand and module number from the event key.
+        """
+        parts = event.strip('-').split('-')
+        nums = [int(p) for p in parts if p.isdigit()]   # filter out the digit
+
+        # assert the first number is the teststand number
+        teststand_no = nums[0]
+
+        if len(nums) == 2:
+            module_no = nums[1]
+        else:
+            module_no = None
+        
+        return teststand_no, module_no

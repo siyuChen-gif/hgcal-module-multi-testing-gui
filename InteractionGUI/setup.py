@@ -1,8 +1,8 @@
 import PySimpleGUI as sg
 from InteractionGUI.display import Display, MAX_TESTSTAND_NUM
-from InteractionGUI.state_controller import StateController
+from InteractionGUI.state_handler import StateHandler
 
-class SetUpGUI:
+class GUISetUp:
     """
     This class contains all the functions that will be auto used to set up the BaseGUI window.
     """
@@ -10,7 +10,7 @@ class SetUpGUI:
         self.window = window
 
         self.display = Display()
-        self.state = StateController(self.window)
+        self.state = StateHandler(self.window)
 
         self.teststands_frame_key = '-TESTSTAND-FRAME-'
 

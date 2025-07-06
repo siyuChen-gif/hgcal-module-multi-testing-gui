@@ -4,7 +4,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import yaml
 import PySimpleGUI as sg
-from InteractionGUI import Display, SetUpGUI, GUIEventHandler
+from InteractionGUI import Display, GUISetUp, GUIEventHandler
 
 configuration = {}
 with open('../configuration.yaml', 'r') as file:
@@ -50,7 +50,7 @@ basewindow = sg.Window("Test Teststand Display", layout, resizable=True, finaliz
 basewindow.maximize()
 
 # Initialize the event handler
-setup = SetUpGUI(basewindow)
+setup = GUISetUp(basewindow)
 handler = GUIEventHandler(basewindow)
 
 # Disable all teststands by default

@@ -1,10 +1,10 @@
 import PySimpleGUI as sg
 
-class StateController:
-    """
-    A class to control the state of the GUI elements.
-    """
-    
+"""
+A class to control the state of the GUI elements.
+"""
+
+class StateHandler: 
     def __init__(self, window):
         self.window = window
 
@@ -35,6 +35,7 @@ class StateController:
             raise
     
     def enable_all(self, keys):
+        """Enable all GUI elements."""
         for key in keys:
             self.enable(key)
 
@@ -46,6 +47,7 @@ class StateController:
             raise
     
     def disable_all(self, keys):
+        """Disable all GUI elements."""
         for key in keys:
             self.disable(key)
 
@@ -58,6 +60,7 @@ class StateController:
                 raise
     
     def set_visibility(self, key, visible=True):
+        """Set visibility of a GUI element."""
         self.window[key].update(visible=visible)
 
     def set_led(self, key, color='green', empty=False):
