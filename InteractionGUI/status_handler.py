@@ -12,6 +12,7 @@ class GUIStatusModel:
                 module_no: {
                     "serial_passed": False,
                     "is_live_module": False,
+                    "skip_electrical_checks": False,
                     "electrical_checks": False,     # True if checks passed or skipped
                     "only_iv_test": False,
                     "box_closed": False,            # True if box is closed
