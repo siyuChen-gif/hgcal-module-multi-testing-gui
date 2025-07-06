@@ -22,15 +22,15 @@ class GUIValueHandler:
 
         return moduleserial
     
-    def get_teststandIP(self, teststand_no):
+    def get_teststand_ip(self, teststand_no):
         """Get the selected teststand IP address from the teststand IP selection section.
            - teststand ip selection key: "-FPGAHostname-{teststand_no}-"
         """
         key = f'-FPGAHostname-{teststand_no}-'
 
-        teststandIP = self.state.get_value(key)
+        teststand_ip = self.state.get_value(key)
 
-        return teststandIP
+        return teststand_ip
 
 
     # ============================================================

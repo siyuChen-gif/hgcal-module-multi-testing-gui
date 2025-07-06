@@ -59,8 +59,8 @@ class GUIEventHandler:
         """
         checkbox key: '-TESTSTAND-{teststand_no}-'
         """
-        teststand_no, _ = self.get_no_from_event(event)
-        is_checked = values.get(event)
+        teststand_no, _ = self._get_no_from_event(event)
+        is_checked = values.get(event, False)
 
         if is_checked:
             self.setup.enable_one_teststand(teststand_no)
@@ -72,7 +72,7 @@ class GUIEventHandler:
         clear button key:   '-CLEAR-{teststand_no}-{module_no}-'
         input box key:      '-Scanned-QR-Code-{teststand_no}-{module_no}-'
         """
-        teststand_no, module_no = self.get_no_from_event(event)
+        teststand_no, module_no = self._get_no_from_event(event)
         key       = f"-Scanned-QR-Code-{teststand_no}-{module_no}-"
 
         self.setup.clear_scanned_qr_code(key)
@@ -82,7 +82,7 @@ class GUIEventHandler:
     # === Helper Functions  ======================================
     # ============================================================
 
-    def get_no_from_event(self, event):
+    def _get_no_from_event(self, event):
         """Helper function to extract the teststand and module number from the event key.
         """
         parts = event.strip('-').split('-')
