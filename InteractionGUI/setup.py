@@ -59,8 +59,12 @@ class GUISetUp:
     def clear_scanned_qr_code(self, key):
         self.state.update_value(key, '')
     
-    """ Function for displaying/hiding the entire Teststand Setup section """
+    """ Functions for displaying/hiding the entire Teststand Setup section """
     def show_teststands_setup(self):
         self.state.set_visibility(self.teststands_frame_key, True)
     def hide_teststands_setup(self):
         self.state.set_visibility(self.teststands_frame_key, False)
+    
+    """ Function for updateing the combo selection section """
+    def update_combo(self, key, value):
+        self.state.update_combo(key, value)

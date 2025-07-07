@@ -124,14 +124,13 @@ class Display:
         for module_no in range(MAX_MODULE_NUM):
             # set up keys
             clear_key = f'-CLEAR-{teststand_no}-{module_no}-'
-            manually_input_key = f'-ManualInput-{teststand_no}-{module_no}-'    # maybe we should replace it as moudle/hxb info
+            module_status_key = f'-ModuleStatus-{teststand_no}-{module_no}-'    # maybe we should replace it as moudle/hxb info
             keys.append(clear_key)
-            keys.append(manually_input_key)
+            keys.append(module_status_key)
 
             # set up buttons
             buttons.append(sg.Button('Clear', key=clear_key))
-            buttons.append(sg.Button('Manually Input', key=manually_input_key))
-            buttons.append(sg.Text(''))
+            buttons.append(sg.Combo(['          '], key=module_status_key, enable_events=True))
 
         return buttons, keys
     
@@ -159,7 +158,7 @@ class Display:
                 for col in range(MAX_COLUMNS):
                     index = row + col * num_rows    # calculate the index of the current frame (column first)
 
-                    if index < len(elements):  # avoid not-existing frame
+                    if index < len(elements):       # avoid not-existing frame
                         this_row.append(elements[index])
 
                 layout.append(this_row) 

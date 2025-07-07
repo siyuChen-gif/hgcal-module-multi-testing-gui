@@ -14,6 +14,13 @@ class StateHandler:
             self.window[key].update(value)
         except Exception as e:
             raise
+
+    def update_combo(self, key, values):
+        """Update the combo value of a GUI combo."""
+        if values:
+            self.window[key].update(values=values, value=values[0])
+        else:
+            self.window[key].update(values=[], value='')
     
     def update_all_value(self, keys, value):
         """Update value of multiple GUI elements."""

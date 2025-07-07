@@ -1,5 +1,6 @@
+import re
 import PySimpleGUI as sg
-from InteractionGUI.state_handler import 
+from InteractionGUI.state_handler import StateHandler
 from global_variables import configuration
 
 class GUIValueHandler:
@@ -53,6 +54,7 @@ class GUIValueHandler:
         """Format the scanned module serial number to the standard format.
         """
         scannedcode = str(scannedcode)
+        moduleserial = ''
 
         if '-' not in scannedcode:
             if len(scannedcode) >= 4:
@@ -69,32 +71,42 @@ class GUIValueHandler:
     def check_valid_module_serial(self, moduleserial):
         """Check if the module serial number is valid.
         """
-        passed = True   # assert every check passed
+        pattern = r'^320-([A-Z]{2})-([A-Z0-9]+)-([A-Z]{2})-(\d+)$'
+        match = re.match(pattern, moduleserial)
 
-        serialsections = moduleserial.split('-')
-
-        if len(moduleserial) >= 18:
-            passed = False
-        elif len(serialsections[-1]) > 4:
-            passed = False
-        elif len(serialsections[-1]) == 4:
-            if serialsections[1][0] == 'M':
-                passed = False 
+        if not match:
+            return 'invalid'
         
-        return passed
+        major_type = match.group(1)
+
+        if major_type.startswith('M'):
+            return 'module'
+        elif major_type.startswith('X'):
+            return 'hxb'
+        else:
+            return 'invalid'
     
     def check_is_live(self, moduleserial):
         """Check if the module is live or not.
            - if live, return True
         """
-        serialsections = moduleserial.split('-')
-
-        # Populate scanned values 
-        if serialsections[1][0] == 'M':
-            is_live = True
-        elif serialsections[1][0] == 'X':
-            is_live = False
-        else:
-            raise ValueError("Invalid module serial number format.")
+        status = self.check_valid_module_serial(moduleserial)
+        is_live = False
         
+        if status == 'module':
+            is_live = True
+
         return is_live
+    
+    def check_is_hxb(self, moduleserial):
+        """Check if the module is hxb or not.
+           - if hxb, return True
+        """
+        status = self.check_valid_module_serial(moduleserial)
+        is_hxb = False
+
+        if status == 'hxb':
+            is_hxb = True
+        
+        return is_hxb
+        

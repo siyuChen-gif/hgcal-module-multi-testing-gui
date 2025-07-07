@@ -1,4 +1,5 @@
 from InteractionGUI.setup import GUISetUp
+from InteractionGUI.value_handler import GUIValueHandler
 
 class GUIEventHandler:
     """
@@ -6,6 +7,7 @@ class GUIEventHandler:
     """
     def __init__(self, window):
         self.setup = GUISetUp(window)
+        self.value_handler = GUIValueHandler(window)
         # The below function map is used to map the event name that does not have any patterns to the corresponding handler function.
         self.event_map = {
             "Enable ALL": self.handle_enable_all,
@@ -33,6 +35,9 @@ class GUIEventHandler:
 
         elif event.startswith('-CLEAR-'):
             self.handle_clear(event)
+        
+        elif event.startswith('-Scanned-QR-Code-'):
+            self.handle_module_status_combo(event, values)
 
         """ More elifs here for future usage... """
     
@@ -69,13 +74,47 @@ class GUIEventHandler:
 
     def handle_clear(self, event):
         """
-        clear button key:   '-CLEAR-{teststand_no}-{module_no}-'
-        input box key:      '-Scanned-QR-Code-{teststand_no}-{module_no}-'
+        clear button key:           '-CLEAR-{teststand_no}-{module_no}-'
+        input box key:              '-Scanned-QR-Code-{teststand_no}-{module_no}-'
+        module status combo key:    '-ModuleStatus-{teststand_no}-{module_no}-' 
         """
         teststand_no, module_no = self._get_no_from_event(event)
         key       = f"-Scanned-QR-Code-{teststand_no}-{module_no}-"
+        combo_key = f'-ModuleStatus-{teststand_no}-{module_no}-'
 
         self.setup.clear_scanned_qr_code(key)
+        self.setup.update_combo(combo_key, [])
+    
+    def handle_module_status_combo(self, event, values):
+        """
+        scanned QR code key:        '-Scanned-QR-Code-{teststand_no}-{module_no}-'   
+        module status combo key:    '-ModuleStatus-{teststand_no}-{module_no}-'
+        """
+        teststand_no, module_no = self._get_no_from_event(event)
+        combo_key = f'-ModuleStatus-{teststand_no}-{module_no}-'
+        qr_key = f'-Scanned-QR-Code-{teststand_no}-{module_no}-'
+
+        scanned_qr_code = values.get(qr_key, '')
+        moduleserial = self.value_handler.format_moduleserial(scanned_qr_code)
+
+        valid_state = self.value_handler.check_valid_module_serial(moduleserial)
+        if valid_state == 'invalid':
+            valid = False
+        else:
+            valid = True
+
+        is_live = self.value_handler.check_is_live(moduleserial)
+        is_hxb = self.value_handler.check_is_hxb(moduleserial)
+
+        if is_live and valid:
+            mod_statuses = ['Assembled', 'Backside Bonded', 'Backside Encapsulated',
+                            'Completely Bonded', 'Bonds Reworked', 'Completely Encapsulated', 'Bolted']
+            self.setup.update_combo(combo_key, mod_statuses)
+        elif is_hxb and valid:
+            hxb_statuses = ['Untaped', 'Taped']
+            self.setup.update_combo(combo_key, hxb_statuses)
+        else:
+            self.setup.update_combo(combo_key, [])
 
 
     # ============================================================
