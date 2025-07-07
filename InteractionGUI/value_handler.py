@@ -1,5 +1,6 @@
 import PySimpleGUI as sg
 from InteractionGUI.state_handler import 
+from global_variables import configuration
 
 class GUIValueHandler:
     def __init__(self, window):
@@ -22,15 +23,26 @@ class GUIValueHandler:
 
         return moduleserial
     
-    def get_teststand_ip(self, teststand_no):
+    def get_fpgahostname(self, teststand_no):
         """Get the selected teststand IP address from the teststand IP selection section.
            - teststand ip selection key: "-FPGAHostname-{teststand_no}-"
         """
         key = f'-FPGAHostname-{teststand_no}-'
 
-        teststand_ip = self.state.get_value(key)
+        fpgahostname = self.state.get_value(key)
 
-        return teststand_ip
+        return fpgahostname
+    
+    def get_fpgatype(self, fpgahostname):
+        """Get the selected FPGA type from the FPGA type selection section.
+        """
+        fpgatypes = configuration['FPGAType']
+
+        for fpgatype in fpgatypes:
+            if fpgatype.lower() in fpgahostname.lower():
+                return fpgatype
+            else:
+                raise NotImplementedError
 
 
     # ============================================================
@@ -70,3 +82,19 @@ class GUIValueHandler:
                 passed = False 
         
         return passed
+    
+    def check_is_live(self, moduleserial):
+        """Check if the module is live or not.
+           - if live, return True
+        """
+        serialsections = moduleserial.split('-')
+
+        # Populate scanned values 
+        if serialsections[1][0] == 'M':
+            is_live = True
+        elif serialsections[1][0] == 'X':
+            is_live = False
+        else:
+            raise ValueError("Invalid module serial number format.")
+        
+        return is_live

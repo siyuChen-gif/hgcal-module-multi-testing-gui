@@ -53,11 +53,10 @@ class StateHandler:
 
     def clear_inputs(self, keys):
         """Clear text inputs."""
-        for key in keys:
-            try:
-                self.window[key].update('')
-            except Exception as e:
-                raise
+        try:
+            self.update_all_value(keys, '')
+        except Exception as e:
+            raise
     
     def set_visibility(self, key, visible=True):
         """Set visibility of a GUI element."""
