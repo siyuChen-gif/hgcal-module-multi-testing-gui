@@ -54,7 +54,7 @@ TESTSTANDS, _ = display_obj.setup_all_teststands()
 
 #GUI LAYOUT
 GUI_LAYOUT = [[sg.Text("Module Testing GUI", font=LGFONT, text_color=CMURED)], LOGO,
-            [TESTSTANDS],
+            [sg.Push(), TESTSTANDS, sg.Push()],
           [sg.Button("Enable ALL"), 
            sg.Button("Disable ALL"),
            sg.Button("Display ALL"),
@@ -62,7 +62,7 @@ GUI_LAYOUT = [[sg.Text("Module Testing GUI", font=LGFONT, text_color=CMURED)], L
            sg.Push(),
            sg.Button("Exit")],
            [sg.Text(key='-EXPAND-', font='ANY 1', pad=(0, 0))],
-           STATUSBAR]
+           [sg.Frame("STATUS",STATUSBAR, key="-statusbar_frame-")]]
 
 
 # layout for status

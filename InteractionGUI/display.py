@@ -220,8 +220,15 @@ class Display:
         return sg.Graph(canvas_size=(radius, radius),
                         graph_bottom_left=(-radius, -radius),
                         graph_top_right=(radius, radius),
-                        pad=(0, 0), key=key, visible=True,
-                        background_color=sg.theme_background_color())
+                        pad=(0, 0), key=key, visible=True)
+    
+    def SetLED(window, key, color, empty=False):
+        graph = window[key]
+        graph.erase()
+        if not empty:
+            graph.draw_circle((0, 0), 12, fill_color=color, line_color=color)
+        else:
+            graph.draw_circle((0, 0), 12, fill_color=None, line_color=color)
     
     # ============================================================
     # === status bar Display ===========================================

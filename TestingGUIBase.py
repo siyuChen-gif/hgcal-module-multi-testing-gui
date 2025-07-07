@@ -23,13 +23,11 @@ interaction with the layout.
 sg.LOOK_AND_FEEL_TABLE['cmutheme'] = layout.CMUTHEME
 sg.theme('cmutheme')
 
-
-basewindow = sg.Window("Module Test: Start", layout.GUI_LAYOUT, margins=(200,80), finalize=True, resizable=True, return_keyboard_events=True)
+basewindow = sg.Window("Module Test: Start", layout.GUI_LAYOUT, margins=(100,80), finalize=True, resizable=True, return_keyboard_events=True)
 # # margins can be changed to suit the monitor; these are for a 1080p monitor
 
+# expand objects
 basewindow['-EXPAND-'].expand(True, True, True) # expand space between menus and status bar
-# event, values = basewindow.read(timeout=10)
-
 basewindow.maximize()
 
 # Initialize the event handler
