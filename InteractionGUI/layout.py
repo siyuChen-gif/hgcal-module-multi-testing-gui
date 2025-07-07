@@ -15,14 +15,15 @@ configuration = {}
 with open('configuration.yaml', 'r') as file:
     configuration = yaml.safe_load(file)
 
-display_obj = display.display()
+display_obj = display.Display()
 
 # Create theme
 
 LGFONT = ('Arial', 2*int(configuration['DefaultFontSize']))
+sg.set_options(font=("Arial", int(configuration['DefaultFontSize'])))
 
 CMURED = '#C41230'
-BKGGRAY = '#252525'
+BKGGRAY = "#252525"
 CMUTHEME = {'BACKGROUND': BKGGRAY,
             'TEXT': '#FFFFFF', 
             'INPUT': BKGGRAY,
@@ -45,30 +46,23 @@ elif vers0 == 3 and vers1 < 9:
     LOGO = [sg.Text("Carnegie Mellon University", text_color=CMURED, font=('Arial', 20))]
 
 # Status bar
-STATUS_SBCOL1 = sg.Frame('', [[sg.Text("Debug Mode: "), sg.Push(), display_obj.LEDIndicator(key='-Debug-Mode-')],
-                       [sg.Text("Is Live Module: "), sg.Push(), display_obj.LEDIndicator(key='-Live-Module-')],
-                       [sg.Text("HV Cable Connected: "), sg.Push(), display_obj.LEDIndicator(key='-HV-Connected-')]])
-STATUS_SBCOL2 = sg.Frame('', [[sg.Text("Dark Box Closed: "), sg.Push(), display_obj.LEDIndicator(key='-Box-Closed-')],
-                       [sg.Text("HV Output Powered: "), sg.Push(), display_obj.LEDIndicator(key='-HV-Output-On-')],
-                       [sg.Text("DCDC Connected: ", key='-DCDC-Connected-Txt-'), sg.Push(), display_obj.LEDIndicator(key='-DCDC-Connected-')]])
-STATUS_SBCOL3 = sg.Frame('', [[sg.Text("DCDC Powered: ", key='-DCDC-Powered-Txt-'), sg.Push(), display_obj.LEDIndicator(key='-DCDC-Powered-')],
-                       [sg.Text("Trophy Connected: "), sg.Push(), display_obj.LEDIndicator(key='-Trophy-Connected-')],
-                       [sg.Text("Hexacontroller Connected: "), sg.Push(), display_obj.LEDIndicator(key='-Hexactrl-Connected-')]])
-STATUS_SBCOL4 = sg.Frame('', [[sg.Text("Hexacontroller Powered: "), sg.Push(), display_obj.LEDIndicator(key='-Hexactrl-Powered-')],
-                       [sg.Text("Hexacontroller Accessed: "), sg.Push(), display_obj.LEDIndicator(key='-Hexactrl-Accessed-')],
-                       [sg.Text("Firmware Loaded: "), sg.Push(), display_obj.LEDIndicator(key='-FW-Loaded-')]])
-STATUS_SBCOL5 = sg.Frame('', [[sg.Text("DAQ Server: "), sg.Push(), display_obj.LEDIndicator(key='-DAQ-Server-')],
-                       [sg.Text("I2C Server: "), sg.Push(), display_obj.LEDIndicator(key='-I2C-Server-')],
-                       [sg.Text("DAQ Client: "), sg.Push(), display_obj.LEDIndicator(key='-DAQ-Client-')]])
+STATUSBAR = display_obj.statusbar()
 
-STATUSBAR= [[STATUS_SBCOL1, STATUS_SBCOL2, STATUS_SBCOL3, STATUS_SBCOL4, STATUS_SBCOL5]]
+# Test stand
+TESTSTANDS, _ = display_obj.setup_all_teststands()
+
 
 #GUI LAYOUT
-GUI_LAYOUT = [[sg.Text("Module Testing GUI", font=LGFONT, text_color=CMURED)], logo,
-          [sg.Push(), sg.Button("Grade Module")],
-          [sg.Text(key='-EXPAND-', font='ANY 1', pad=(0, 0))],
-          [sg.Frame('Status Bar', STATUSBAR)]]
-
+GUI_LAYOUT = [[sg.Text("Module Testing GUI", font=LGFONT, text_color=CMURED)], LOGO,
+            [TESTSTANDS],
+          [sg.Button("Enable ALL"), 
+           sg.Button("Disable ALL"),
+           sg.Button("Display ALL"),
+           sg.Button("Hide ALL"),
+           sg.Push(),
+           sg.Button("Exit")],
+           [sg.Text(key='-EXPAND-', font='ANY 1', pad=(0, 0))],
+           STATUSBAR]
 
 
 # layout for status

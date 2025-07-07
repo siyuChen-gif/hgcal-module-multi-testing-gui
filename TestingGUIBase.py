@@ -1,12 +1,13 @@
 import sys
 import PySimpleGUI as sg
-from Keithley2410 import Keithley2410
+import os
 from time import sleep, time
-from InteractionGUI import *
 from datetime import datetime, timedelta
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from InteractionGUI import layout
+from InteractionGUI import layout, Display, GUISetUp, GUIEventHandler
 from DBTools import add_RH_T, readout_info, iv_info, assembly_info, summary_upload, fetch_comments, serial_remove_dashes
+from Keithley2410 import Keithley2410
 
 """
 This script creates and runs the main GUI window for the testing system. It firsts establishes a theme and sets some functions, 
@@ -22,12 +23,30 @@ interaction with the layout.
 sg.LOOK_AND_FEEL_TABLE['cmutheme'] = layout.CMUTHEME
 sg.theme('cmutheme')
 
+
 basewindow = sg.Window("Module Test: Start", layout.GUI_LAYOUT, margins=(200,80), finalize=True, resizable=True, return_keyboard_events=True)
-# margins can be changed to suit the monitor; these are for a 1080p monitor
+# # margins can be changed to suit the monitor; these are for a 1080p monitor
+
 basewindow['-EXPAND-'].expand(True, True, True) # expand space between menus and status bar
-event, values = basewindow.read(timeout=10)
+# event, values = basewindow.read(timeout=10)
+
 basewindow.maximize()
 
-for led in layout.ledlist:
-    SetLED(basewindow, led, 'black', empty=True)
-SetLED(basewindow, '-Debug-Mode-', 'green' if DEBUG_MODE else 'red')
+# Initialize the event handler
+setup = GUISetUp(basewindow)
+handler = GUIEventHandler(basewindow)
+
+# Disable all teststands by default
+setup.disable_all_teststands()
+
+# start the event loop
+while True:
+    event, values = basewindow.read()
+
+    if event == sg.WINDOW_CLOSED or event == "Exit":
+        break
+
+    handler.handle_event(event, values)
+
+
+basewindow.close()

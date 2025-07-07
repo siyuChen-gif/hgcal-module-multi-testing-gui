@@ -1,6 +1,10 @@
 import yaml
 import PySimpleGUI as sg
 
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 """
 This file contains the class that contain functions for displaying features to user.
 """
@@ -10,7 +14,7 @@ MAX_TESTSTAND_NUM = 8
 MAX_MODULE_NUM = 3
 
 configuration = {}
-with open('../configuration.yaml', 'r') as file:
+with open('configuration.yaml', 'r') as file:
     configuration = yaml.safe_load(file)
 
 class Display:
@@ -216,4 +220,31 @@ class Display:
         return sg.Graph(canvas_size=(radius, radius),
                         graph_bottom_left=(-radius, -radius),
                         graph_top_right=(radius, radius),
-                        pad=(0, 0), key=key, visible=True)
+                        pad=(0, 0), key=key, visible=True,
+                        background_color=sg.theme_background_color())
+    
+    # ============================================================
+    # === status bar Display ===========================================
+    # ============================================================
+
+    def statusbar(self):
+        """ This function sets up the statusbar.
+        """
+
+        STATUS_SBCOL1 = sg.Frame('', [[sg.Text("Debug Mode: "), sg.Push(), self.LEDIndicator(key='-Debug-Mode-')],
+                            [sg.Text("Is Live Module: "), sg.Push(), self.LEDIndicator(key='-Live-Module-')],
+                            [sg.Text("HV Cable Connected: "), sg.Push(), self.LEDIndicator(key='-HV-Connected-')]],key = "-status_sbcol1-frame-")
+        STATUS_SBCOL2 = sg.Frame('', [[sg.Text("Dark Box Closed: "), sg.Push(), self.LEDIndicator(key='-Box-Closed-')],
+                            [sg.Text("HV Output Powered: "), sg.Push(), self.LEDIndicator(key='-HV-Output-On-')],
+                            [sg.Text("DCDC Connected: ", key='-DCDC-Connected-Txt-'), sg.Push(), self.LEDIndicator(key='-DCDC-Connected-')]],key = "-status_sbcol2-frame-")
+        STATUS_SBCOL3 = sg.Frame('', [[sg.Text("DCDC Powered: ", key='-DCDC-Powered-Txt-'), sg.Push(), self.LEDIndicator(key='-DCDC-Powered-')],
+                            [sg.Text("Trophy Connected: "), sg.Push(), self.LEDIndicator(key='-Trophy-Connected-')],
+                            [sg.Text("Hexacontroller Connected: "), sg.Push(), self.LEDIndicator(key='-Hexactrl-Connected-')]],key = "-status_sbcol3-frame-")
+        STATUS_SBCOL4 = sg.Frame('', [[sg.Text("Hexacontroller Powered: "), sg.Push(), self.LEDIndicator(key='-Hexactrl-Powered-')],
+                            [sg.Text("Hexacontroller Accessed: "), sg.Push(), self.LEDIndicator(key='-Hexactrl-Accessed-')],
+                            [sg.Text("Firmware Loaded: "), sg.Push(), self.LEDIndicator(key='-FW-Loaded-')]],key = "-status_sbcol4-frame-")
+        STATUS_SBCOL5 = sg.Frame('', [[sg.Text("DAQ Server: "), sg.Push(), self.LEDIndicator(key='-DAQ-Server-')],
+                            [sg.Text("I2C Server: "), sg.Push(), self.LEDIndicator(key='-I2C-Server-')],
+                            [sg.Text("DAQ Client: "), sg.Push(), self.LEDIndicator(key='-DAQ-Client-')]],key = "-status_sbcol5-frame-")
+        
+        return [[STATUS_SBCOL1, STATUS_SBCOL2, STATUS_SBCOL3, STATUS_SBCOL4, STATUS_SBCOL5]]
