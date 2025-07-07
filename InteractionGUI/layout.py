@@ -52,10 +52,14 @@ STATUSBAR = display_obj.statusbar()
 # Test stand
 TESTSTANDS, _ = display_obj.setup_all_teststands()
 
+# Inspectors
+INSPECTOR = display_obj.setup_inspectors()
+
 
 #GUI LAYOUT
-GUI_LAYOUT = [[sg.Text("Module Testing GUI", font=lgfont, text_color=cmured)], LOGO,
-              [sg.Push(), TESTSTANDS, sg.Push()],
+GUI_LAYOUT = [[sg.Text("Module Testing GUI", font=lgfont, text_color=cmured)], 
+               LOGO + INSPECTOR,
+              [TESTSTANDS],
               [sg.Button("Enable ALL"), 
                sg.Button("Disable ALL"),
                sg.Button("Display ALL"),

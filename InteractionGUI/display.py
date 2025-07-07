@@ -98,6 +98,15 @@ class Display:
     # === Texts Display ==========================================
     # ============================================================
 
+    def setup_inspectors(self):
+        """Set up inspectors.
+        """
+        inspectors = configuration['Inspectors']
+        key = "-INSPECTOR-"
+        arg = [sg.Push(), sg.Text('Inspectors:'), sg.Combo(inspectors, key=key)]
+
+        return arg
+
     def _setup_qr_code_input(self, teststand_no):
         """Set up layout for QR Code input
         """
