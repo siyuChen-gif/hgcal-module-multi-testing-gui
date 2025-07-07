@@ -1,7 +1,7 @@
 import sys
 import PySimpleGUI as sg
 from time import sleep, time
-from InteractionGUI import display
+from InteractionGUI import Display
 from datetime import datetime, timedelta
 
 import yaml
@@ -10,32 +10,33 @@ import yaml
 This script stores all the layout information.
 """
 
-# Load configuration file
 configuration = {}
-with open('configuration.yaml', 'r') as file:
+with open('./configuration.yaml', 'r') as file:
     configuration = yaml.safe_load(file)
 
-display_obj = display.Display()
-
 # Create theme
-
-LGFONT = ('Arial', 2*int(configuration['DefaultFontSize']))
+lgfont = ('Arial', 2*int(configuration['DefaultFontSize']))
 sg.set_options(font=("Arial", int(configuration['DefaultFontSize'])))
 
-CMURED = '#C41230'
-BKGGRAY = "#252525"
-CMUTHEME = {'BACKGROUND': BKGGRAY,
+cmured = '#C41230'
+bkggray = '#252525'
+cmutheme = {'BACKGROUND': bkggray,
             'TEXT': '#FFFFFF', 
-            'INPUT': BKGGRAY,
+            'INPUT': bkggray,
             'TEXT_INPUT': '#FFFFFF',
-            'SCROLL': CMURED,
-            'BUTTON': (CMURED, BKGGRAY),
+            'SCROLL': cmured,
+            'BUTTON': (cmured, bkggray),
             'PROGRESS': ('#000000', '#000000'),
             'BORDER': 1,
             'SLIDER_DEPTH': 0,
             'PROGRESS_DEPTH': 0,
-            'COLOR_LIST': [CMURED, '#FFFFFF', BKGGRAY],
+            'COLOR_LIST': [cmured, '#FFFFFF', bkggray],
             'DESCRIPTION': ['Red', 'Blue', 'Grey', 'Vintage', 'Wedding']}
+sg.LOOK_AND_FEEL_TABLE['cmutheme'] = cmutheme
+sg.theme('cmutheme')
+
+# Initialize the class
+display_obj = Display()
 
 #logo
 vers0 = sys.version_info[0]
@@ -43,7 +44,7 @@ vers1 = sys.version_info[1]
 if vers0 == 3 and vers1 >= 9:
     LOGO = [sg.Image('hexmap/geometries/cmu-wordmark-horizontal-r-resized.png')]
 elif vers0 == 3 and vers1 < 9:
-    LOGO = [sg.Text("Carnegie Mellon University", text_color=CMURED, font=('Arial', 20))]
+    LOGO = [sg.Text("Carnegie Mellon University", text_color=cmured, font=('Arial', 20))]
 
 # Status bar
 STATUSBAR = display_obj.statusbar()
@@ -53,16 +54,16 @@ TESTSTANDS, _ = display_obj.setup_all_teststands()
 
 
 #GUI LAYOUT
-GUI_LAYOUT = [[sg.Text("Module Testing GUI", font=LGFONT, text_color=CMURED)], LOGO,
-            [sg.Push(), TESTSTANDS, sg.Push()],
-          [sg.Button("Enable ALL"), 
-           sg.Button("Disable ALL"),
-           sg.Button("Display ALL"),
-           sg.Button("Hide ALL"),
-           sg.Push(),
-           sg.Button("Exit")],
-           [sg.Text(key='-EXPAND-', font='ANY 1', pad=(0, 0))],
-           [sg.Frame("STATUS",STATUSBAR, key="-statusbar_frame-")]]
+GUI_LAYOUT = [[sg.Text("Module Testing GUI", font=lgfont, text_color=cmured)], LOGO,
+              [sg.Push(), TESTSTANDS, sg.Push()],
+              [sg.Button("Enable ALL"), 
+               sg.Button("Disable ALL"),
+               sg.Button("Display ALL"),
+               sg.Button("Hide ALL"),
+               sg.Push(),
+               sg.Button("Exit")],
+              [sg.Text(key='-EXPAND-', font='ANY 1', pad=(0, 0))],
+              [sg.Frame("STATUS",STATUSBAR, key="-statusbar_frame-")]]
 
 
 # layout for status
