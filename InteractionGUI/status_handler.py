@@ -62,7 +62,8 @@ class GUIStatusModel:
                 },
                 "module_values": {
                     module_no: {
-                        "moduleserial": None
+                        "moduleserial": None,
+                        "selected_test": None
                     } for module_no in range(1, MAX_MODULE_NUM + 1)
                 }
             } for teststand_no in range(1, MAX_TESTSTAND_NUM + 1)

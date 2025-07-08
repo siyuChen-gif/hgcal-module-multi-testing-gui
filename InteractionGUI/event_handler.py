@@ -49,6 +49,9 @@ class GUIEventHandler:
         
         elif event.startswith('-Scanned-QR-Code-'):
             self.handle_module_status_combo(event, values)
+        
+        elif event.startswith('-TestSelectionButton-'):
+            self.handle_popup_test_selection(event, values)
 
         """ More elifs here for future usage... """
     
@@ -136,6 +139,11 @@ class GUIEventHandler:
             self.setup.update_combo(combo_key, [])
         
     def handle_configure_teststand(self):
+        """
+        configure teststand button key: '-Configure-Test-Stand-'
+        """
+        self.setup.disable_key("-Configure-Test-Stand-")
+
         configured = True   # assert all teststands configured
 
         if DEBUG_MODE:
@@ -166,6 +174,30 @@ class GUIEventHandler:
 
             # update the default test
             self._update_default_test(temp_value_maps)
+        
+    def handle_popup_test_selection(self, event, values):
+        """
+        test selection key:        "-TestSelection-{teststand_no}-{module_no}-"
+        test selection button key: "-TestSelectionButton-{teststand_no}-{module_no}-"
+        """
+        # get the teststand and module number from the event key
+        teststand_no, module_no = self._get_no_from_event(event)
+
+        # get the module serial from the value map
+        moduleserial = self.status.get_value("moduleserial", teststand_no, module_no)
+
+        # display the pop up screen
+        selected_test, label_map = self.display.setup_popup_test_selection(moduleserial)
+
+        for test, result in selected_test.items():
+            if result:
+                # update the value map:
+                self.status.update_value("selected_test", teststand_no, module_no, value=test)
+
+                # update the displayed test name in GUI
+                key = f"-TestSelection-{teststand_no}-{module_no}-"
+                test_name = label_map[test]
+                self.setup.update_test(key, test_name)
 
 
     # ============================================================
@@ -224,7 +256,8 @@ class GUIEventHandler:
 
                     if moduleserial:
                         key = f"-TestSelection-{teststand_no}-{module_no}-"
-                        self.setup.update_default_test(key)
+                        test = "Standard Test Procedure"
+                        self.setup.update_test(key, test)
                     else:
                         keys = [f"-TestSelection-{teststand_no}-{module_no}-", f"-TestSelectionButton-{teststand_no}-{module_no}-"]
                         for key in keys:
