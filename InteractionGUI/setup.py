@@ -12,7 +12,8 @@ class GUISetUp:
         self.display = Display()
         self.state = StateHandler(self.window)
 
-        self.teststands_frame_key = '-TESTSTAND-FRAME-'
+        self.teststands_layout_key = '-TESTSTANDS-LAYOUT-'
+        self.tests_selection_layout_key = '-TESTS-SELECTION-LAYOUT-'
 
 
     # ============================================================
@@ -61,10 +62,22 @@ class GUISetUp:
     
     """ Functions for displaying/hiding the entire Teststand Setup section """
     def show_teststands_setup(self):
-        self.state.set_visibility(self.teststands_frame_key, True)
+        self.state.set_visibility(self.teststands_layout_key, True)
     def hide_teststands_setup(self):
-        self.state.set_visibility(self.teststands_frame_key, False)
+        self.state.set_visibility(self.teststands_layout_key, False)
     
     """ Function for updateing the combo selection section """
     def update_combo(self, key, value):
         self.state.update_combo(key, value)
+
+    """ Functions for displaying/hiding the tests selection section """
+    def show_tests_selection_setup(self):
+        self.state.set_visibility(self.tests_selection_layout_key, True)
+    def hide_tests_selection_setup(self):
+        self.state.set_visibility(self.tests_selection_layout_key, False)
+    
+    """ Functions for adding/deleting the tests selection section """
+    def add_tests_selection_setup(self, element):
+        self.state.add_element(self.tests_selection_layout_key, element)
+    def delete_tests_selection_setup(self):
+        self.state.delete_element(self.tests_selection_layout_key)

@@ -1,7 +1,6 @@
 import re
 import PySimpleGUI as sg
 from InteractionGUI.state_handler import StateHandler
-from global_variables import configuration
 
 class GUIValueHandler:
     def __init__(self, window):
@@ -17,7 +16,7 @@ class GUIValueHandler:
         """Get and format the module serial from the selected Scanned QR code section.
            - scanned QR code key: '-Scanned-QR-Code-{teststand_no}-{module_no}-'
         """
-        key = f'-Scanned-QR-Code-{teststand_no}-{module_no}-'
+        key = f"-Scanned-QR-Code-{teststand_no}-{module_no}-"
 
         scannedcode = self.state.get_value(key)
         moduleserial = self.format_moduleserial(scannedcode)

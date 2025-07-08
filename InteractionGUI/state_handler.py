@@ -80,3 +80,21 @@ class StateHandler:
                 graph.draw_circle((0, 0), 12, fill_color=color, line_color=color)
         except Exception as e:
             raise
+    
+    def delete_element(self, key):
+        """Delete the placeholder element.
+        """
+        try:
+            self.window[key].Widget.pack_forget()
+        except Exception as e:
+            raise
+    
+    def add_element(self, key, element):
+        """Add the element to the GUI.
+        """
+        parent_elem = self.window[key]
+
+        try:
+            self.window.extend_layout(parent_elem, [[element]])
+        except Exception as e:
+            raise

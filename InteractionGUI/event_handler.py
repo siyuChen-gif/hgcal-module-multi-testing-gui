@@ -1,5 +1,14 @@
+from time import sleep
+
 from InteractionGUI.setup import GUISetUp
+from InteractionGUI.display import Display
 from InteractionGUI.value_handler import GUIValueHandler
+from InteractionGUI.status_handler import GUIStatusModel
+
+# Constants:
+MAX_TESTSTAND_NUM = 8
+MAX_MODULE_NUM = 3
+DEBUG_MODE = True
 
 class GUIEventHandler:
     """
@@ -8,12 +17,14 @@ class GUIEventHandler:
     def __init__(self, window):
         self.setup = GUISetUp(window)
         self.value_handler = GUIValueHandler(window)
+        self.display = Display()
+        self.status = GUIStatusModel(window)
+
         # The below function map is used to map the event name that does not have any patterns to the corresponding handler function.
         self.event_map = {
-            "Enable ALL": self.handle_enable_all,
-            "Disable ALL": self.handle_disable_all,
-            "Display ALL": self.handle_display_all,
-            "Hide ALL": self.handle_hide_all,
+            "Select ALL": self.handle_enable_all,
+            "De-Select ALL": self.handle_disable_all,
+            "-Configure-Test-Stand-": self.handle_configure_teststand,
         }
         # The above event map is currently for demonstration purposes only.
 
@@ -62,15 +73,23 @@ class GUIEventHandler:
 
     def handle_teststand_checkbox(self, event, values):
         """
-        checkbox key: '-TESTSTAND-{teststand_no}-'
+        checkbox key:           '-TESTSTAND-{teststand_no}-'
+        selected status key:    'is_selected'
         """
         teststand_no, _ = self._get_no_from_event(event)
         is_checked = values.get(event, False)
 
         if is_checked:
             self.setup.enable_one_teststand(teststand_no)
+            self.status.update_status("is_selected", teststand_no)
+
+            fpgahostname = self.value_handler.get_fpgahostname(teststand_no)
+            self.status.update_value("fpgahostname", teststand_no, value=fpgahostname)
+            
         else:
             self.setup.disable_one_teststand(teststand_no)
+            self.status.update_status("is_selected", teststand_no, value=False)
+            self.status.update_value("fpgahostname", teststand_no)
 
     def handle_clear(self, event):
         """
@@ -115,6 +134,35 @@ class GUIEventHandler:
             self.setup.update_combo(combo_key, hxb_statuses)
         else:
             self.setup.update_combo(combo_key, [])
+        
+    def handle_configure_teststand(self):
+        configured = True   # assert all teststands configured
+
+        if DEBUG_MODE:
+            sleep(1)
+        
+        if configured:
+            self._update_temp_value_map()
+
+            temp_value_maps = self.status.temp_value_maps
+
+            end = self.display.waiting_window("Test stands configured.")
+            sleep(1)
+            end.close()
+            
+            # hide the configuration setup frame
+            self.setup.hide_teststands_setup()
+
+            # display the testselection frame
+            self.setup.delete_tests_selection_setup()   # remove the placeholder
+
+            TEST_SETUP_LAYOUT = self.display.setup_all_test_selection(temp_value_maps)
+            
+            # add the test selection frame to the window
+            self.setup.add_tests_selection_setup(TEST_SETUP_LAYOUT)
+
+            # show the frame
+            self.setup.show_tests_selection_setup()
 
 
     # ============================================================
@@ -136,3 +184,19 @@ class GUIEventHandler:
             module_no = None
         
         return teststand_no, module_no
+    
+    def _update_temp_value_map(self):
+        """Helper function for updating the temp_value_map for future usage.
+        """
+        for teststand_no in range(1, MAX_TESTSTAND_NUM+1):
+            is_selected = self.status.get_status("is_selected", teststand_no)
+
+            if is_selected:
+                fpgahostname = self.value_handler.get_fpgahostname(teststand_no)
+                self.status.update_value("fpgahostname", teststand_no, value=fpgahostname)
+
+                for module_no in range(1, MAX_MODULE_NUM+1):
+                    moduleserial = self.value_handler.get_module_serial(teststand_no, module_no)
+
+                    if moduleserial != '':
+                        self.status.update_value("moduleserial", teststand_no, module_no, value=moduleserial)

@@ -1,4 +1,3 @@
-from global_variables import configuration
 from InteractionGUI.value_handler import GUIValueHandler
 
 import numpy as np
@@ -15,10 +14,15 @@ import multiprocessing, signal
 from multiprocessing import Process, Manager, active_children
 from datetime import datetime
 
+# Constants:
+MAX_TESTSTAND_NUM = 8
+MAX_MODULE_NUM = 3
+
+
 class GUIStatusModel:
-    def __init__(self):
+    def __init__(self, window):
         # initialize the value handler
-        self.value_handler = GUIValueHandler()
+        self.value_handler = GUIValueHandler(window)
 
         # set up flags
         self.flags = {
@@ -51,14 +55,28 @@ class GUIStatusModel:
             } for teststand_no in range(1, MAX_TESTSTAND_NUM + 1)
         }
 
+        self.temp_value_maps = {
+            teststand_no: {
+                "teststand_values": {
+                    "fpgahostname": None
+                },
+                "module_values": {
+                    module_no: {
+                        "moduleserial": None
+                    } for module_no in range(1, MAX_MODULE_NUM + 1)
+                }
+            } for teststand_no in range(1, MAX_TESTSTAND_NUM + 1)
+        }
+
         # set up devices
         self.devices = {
             "pc": None,
-            "ps": None,
-            teststand_no: {
-                "ts": None
-            } for teststand_no in range(1, MAX_TESTSTAND_NUM + 1)
+            "ps": None
         }
+        self.devices.update({
+            teststand_no: {"ts": None}
+            for teststand_no in range(1, MAX_TESTSTAND_NUM + 1)
+        })
 
     # ============================================================
     # === Helper functions =======================================
@@ -79,6 +97,22 @@ class GUIStatusModel:
             return self.flags[teststand_no]["module_flags"][module_no].get(key, False)
         else:
             return self.flags[teststand_no]["teststand_flags"].get(key, False)
+    
+    def update_value(self, key, teststand_no, module_no=None, value=None):
+        """Update status of a teststand or a module.
+        """
+        if module_no is not None:
+            self.temp_value_maps[teststand_no]["module_values"][module_no][key] = value
+        else:
+            self.temp_value_maps[teststand_no]["teststand_values"][key] = value
+
+    def get_value(self, key, teststand_no, module_no=None):
+        """Get status of a teststand or a module.
+        """
+        if module_no is not None:
+            return self.temp_value_maps[teststand_no]["module_values"][module_no].get(key, None)
+        else:
+            return self.temp_value_maps[teststand_no]["teststand_values"].get(key, None)
     
     def fetch_given_flag(self, teststand_no, module_no=None):
         """Return the combined flags for a given teststand/module.
@@ -262,11 +296,12 @@ class GUIContext:
         # set up value map for all teststands and modules:
         self.value_map = {
             "RH": None,
-            "Temp": None,
-            teststand_no: {
-                self.teststands[teststand_no].value_map
-            } for teststand_no in self.ready_to_run.keys()
+            "Temp": None
         }
+        self.value_map.update({
+            teststand_no: self.teststands[teststand_no].value_map
+            for teststand_no in self.ready_to_run.keys()
+        })
 
     def update_temp_humidity(self):
         """Update the temperature and humidity values for all teststands and modules.
