@@ -245,9 +245,16 @@ class Display:
     # === Tests Selection Display ================================
     # ============================================================
 
-    def set_up_popup_test_selection(self, moduleserial):
+    def setup_popup_test_selection(self, moduleserial):
         """Setup the popup test selection for given module serial.
         """
+        # Select Tests fields only shown if able to bias the module
+        BVonly = [[sg.Text('Bias Voltage (per run): '),
+                sg.Input(s=5, key='-Bias-Voltage-Pedestal1-'), sg.Input(s=5, key='-Bias-Voltage-Pedestal2-'),
+                sg.Input(s=5, key='-Bias-Voltage-Pedestal3-'), sg.Input(s=5, key='-Bias-Voltage-Pedestal4-'),
+                sg.Input(s=5, key='-Bias-Voltage-Pedestal5-'), sg.Input(s=5, key='-Bias-Voltage-Pedestal6-')]]
+
+        # Select Tests section
         other_scripts = ['pedestal_scan', 'delay_scan', 'injection_scan', 'phase_scan', 'sampling_scan', 'toa_trim_scan', 
                         'toa_vref_scan_noinj', 'toa_vref_scan', 'vref2D_scan', 'vrefinv_scan', 'vrefnoinv_scan']
         layout = [
@@ -266,6 +273,29 @@ class Display:
             [sg.Button("Confirm", key='-CONFIRM-'), sg.Button("Cancel")]
         ]
 
+        # Generate label map
+        label_map = {
+            '-Standard-Test-': 'Standard Test Procedure',
+            '-Trim-Pedestals-': 'Trim Pedestals',
+            '-Bias-Voltage-PedTrim-Text-': 'Trim Pedestals',
+            '-Bias-Voltage-PedTrim-': 'Trim Pedestals',
+            '-Pedestal-Run-': 'Pedestal Run',
+            '-N-Pedestals-': 'Pedestal Run',
+            '-Other-Script-': 'Other Test Script',
+            '-Other-Which-Script-': 'Other Test Script',
+            '-Bias-Voltage-Other-Text-': 'Other Test Script',
+            '-Bias-Voltage-Other-': 'Other Test Script',
+            '-Ambient-IV-': 'Ambient IV Curve',
+            '-AmbIV-MaxV-': 'Ambient IV Curve',
+            '-Dry-IV-': 'Dry IV Curve',
+            '-N-Dry-IV-': 'Dry IV Curve',
+            '-DryIV-Wait-Time-1-': 'Dry IV Curve',
+            '-DryIV-Wait-Time-2-': 'Dry IV Curve',
+            '-DryIV-Wait-Time-3-': 'Dry IV Curve',
+            '-DryIV-MaxV-': 'Dry IV Curve'
+        }
+
+        # Create the window
         window = sg.Window("Select Tests", layout, modal=True)
 
         while True:
@@ -275,7 +305,7 @@ class Display:
                 return None   
             elif event == '-CONFIRM-':
                 window.close()
-                return values
+                return values, label_map
     
     def setup_single_test_selection(self, teststand_no, temp_value_maps):
         """Setup the single test selection for given teststand.
