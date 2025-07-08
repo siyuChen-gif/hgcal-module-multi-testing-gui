@@ -259,7 +259,7 @@ class Display:
                         'toa_vref_scan_noinj', 'toa_vref_scan', 'vref2D_scan', 'vrefinv_scan', 'vrefnoinv_scan']
         layout = [
             [sg.Text(f'Tests to run for Module {moduleserial}' if moduleserial else 'Tests to run:')],
-            [sg.Checkbox('Standard Test Procedure', key='-Standard-Test-'), sg.Text('IV Max Voltage:'), sg.Input(s=5, key='-StandardIV-MaxV-')],
+            [sg.Checkbox('Standard Test Procedure', key='-Standard-Test-', default=True), sg.Text('IV Max Voltage:'), sg.Input(s=5, key='-StandardIV-MaxV-')],
             [sg.Checkbox('Trim Pedestals', key='-Trim-Pedestals-'), sg.Text('Bias Voltage:', key='-Bias-Voltage-PedTrim-Text-'), sg.Input(s=5, key='-Bias-Voltage-PedTrim-')],
             [sg.Checkbox('Pedestal Run', key='-Pedestal-Run-', enable_events=True), sg.Text('Number of tests:'), sg.Input(s=2, key='-N-Pedestals-', enable_events=True)],
             [sg.pin(sg.Column(BVonly, key='-BV-Menu-', visible=False))],
