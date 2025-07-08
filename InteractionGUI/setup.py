@@ -81,3 +81,14 @@ class GUISetUp:
         self.state.add_element(self.tests_selection_layout_key, element)
     def delete_tests_selection_setup(self):
         self.state.delete_element(self.tests_selection_layout_key)
+    
+    """ Functions for updating the default test for test selection section """
+    def update_default_test(self, key):
+        value = "Standard Test Procedure"
+        self.state.update_value(key, value)
+    
+    """ Functions for able/disable one given key """
+    def enable_key(self, key):
+        self.state.enable(key)
+    def disable_key(self, key):
+        self.state.disable(key)

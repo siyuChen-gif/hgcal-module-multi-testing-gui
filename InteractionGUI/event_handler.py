@@ -164,6 +164,9 @@ class GUIEventHandler:
             # show the frame
             self.setup.show_tests_selection_setup()
 
+            # update the default test
+            self._update_default_test(temp_value_maps)
+
 
     # ============================================================
     # === Helper Functions  ======================================
@@ -200,3 +203,29 @@ class GUIEventHandler:
 
                     if moduleserial != '':
                         self.status.update_value("moduleserial", teststand_no, module_no, value=moduleserial)
+    
+    def _update_default_test(self, temp_value_maps):
+        """Helper function for updating the default input.
+           - test selection key:        "-TestSelection-{teststand_no}-{module_no}-"
+           - test selection button key: "-TestSelectionButton-{teststand_no}-{module_no}-"
+        """
+        for teststand_no in range(1, MAX_TESTSTAND_NUM+1):
+            fpgahostname = self.status.get_value("fpgahostname", teststand_no)
+
+            if not fpgahostname:
+                for module_no in range(1, MAX_MODULE_NUM+1):
+                    keys = [f"-TestSelection-{teststand_no}-{module_no}-", f"-TestSelectionButton-{teststand_no}-{module_no}-"]
+                    for key in keys:
+                        self.setup.disable_key(key)
+
+            if fpgahostname:
+                for module_no in range(1, MAX_MODULE_NUM+1):
+                    moduleserial = self.value_handler.get_module_serial(teststand_no, module_no)
+
+                    if moduleserial:
+                        key = f"-TestSelection-{teststand_no}-{module_no}-"
+                        self.setup.update_default_test(key)
+                    else:
+                        keys = [f"-TestSelection-{teststand_no}-{module_no}-", f"-TestSelectionButton-{teststand_no}-{module_no}-"]
+                        for key in keys:
+                            self.setup.disable_key(key)

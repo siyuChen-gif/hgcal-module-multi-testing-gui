@@ -312,11 +312,12 @@ class Display:
         main_layout = [head]
 
         for module_no in range(1, MAX_MODULE_NUM+1):
-            moduleserial = temp_value_maps[teststand_no]["module_values"][module_no]["moduleserial"]
-            row = [sg.Text(f"Module {module_no}: "), sg.Text(f"{moduleserial}")]
+            row = [sg.Text(f"Module {module_no}: "), sg.Text("    ")]
 
             input_key = f"-TestSelection-{teststand_no}-{module_no}-"
             row.append(sg.Input(s=20, key=input_key, enable_events=True))
+
+            row.append(sg.Text(" "))
 
             button_key = f"-TestSelectionButton-{teststand_no}-{module_no}-"
             row.append(sg.Button("Select Test", key=button_key))
