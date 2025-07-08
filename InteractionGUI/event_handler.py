@@ -1,4 +1,5 @@
 from time import sleep
+import PySimpleGUI as sg
 
 from InteractionGUI.setup import GUISetUp
 from InteractionGUI.display import Display
@@ -25,6 +26,7 @@ class GUIEventHandler:
             "Select ALL": self.handle_enable_all,
             "De-Select ALL": self.handle_disable_all,
             "-Configure-Test-Stand-": self.handle_configure_teststand,
+            "-Back-To-Base": self.handle_back_to_base,
         }
         # The above event map is currently for demonstration purposes only.
 
@@ -166,6 +168,18 @@ class GUIEventHandler:
 
             # update the default test
             self._update_default_test(temp_value_maps)
+
+    def handle_back_to_base(self):
+
+        """ This function is only used for going from test selection page to the very test stands setup page.
+        """
+
+        # hide the test selection page
+        self.setup.hide_tests_selection_setup()
+
+        # unhide the teststand setup page
+        self.setup.show_teststands_setup()
+
 
 
     # ============================================================

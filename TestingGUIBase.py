@@ -38,7 +38,7 @@ setup.disable_all_teststands()
 
 # start the event loop
 while True:
-    event, values = basewindow.read()
+    window, event, values = sg.read_all_windows()
 
     if event == sg.WINDOW_CLOSED or event == "Exit":
         break

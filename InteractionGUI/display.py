@@ -69,32 +69,6 @@ class Display:
         event, values = window.read(timeout=100)
         return window
 
-    def check_window(self, info: str):  # haven't test yet
-        """
-        Function which opens a window for user to check the input is correct or not.
-        """
-        # set up layout
-        layout = [[sg.Text("Test Setup Check: ", font=lgfont)]]
-        if info is not None:
-            layout.append([sg.Text(info)])
-        layout.append([[sg.Button("Return Last Step")], [sg.Button("Continue")]])
-
-        # set up window
-        window = sg.Window("Test Setup Check", layout, margins=(200,100))
-
-        ret = ''    # initialize status
-
-        # display
-        while True:
-            event, values = window.read()
-
-            if event == "Return Last Step" or event == sg.WIN_CLOSED:
-                break
-            elif event == "Continue":
-                ret = 'CONT'
-
-        return ret
-
 
     # ============================================================
     # === Teststands Setup Display ===============================
@@ -298,7 +272,7 @@ class Display:
             event, values = window.read()
             if event in (sg.WINDOW_CLOSED, 'Cancel'):
                 window.close()
-                return None
+                return None   
             elif event == '-CONFIRM-':
                 window.close()
                 return values
@@ -339,3 +313,30 @@ class Display:
         all_test_selection_setup = self._assign_layout(single_frames, is_vertical, MAX_COLUMNS)
 
         return sg.Frame('Tests Selections', layout=all_test_selection_setup, key='-TESTS-SELECTION-LAYOUT-', visible=True)
+    
+
+    def check_window(self, info: str):  # haven't test yet
+        """
+        Function which opens a window for user to check the input is correct or not.
+        """
+        # set up layout
+        layout = [[sg.Text("Test Setup Check: ", font=lgfont)]]
+        if info is not None:
+            layout.append([sg.Text(info)])
+        layout.append([[sg.Button("Return Last Step")], [sg.Button("Continue")]])
+
+        # set up window
+        window = sg.Window("Test Setup Check", layout, margins=(200,100))
+
+        ret = ''    # initialize status
+
+        # display
+        while True:
+            event, values = window.read()
+
+            if event == "Return Last Step" or event == sg.WIN_CLOSED:
+                break
+            elif event == "Continue":
+                ret = 'CONT'
+
+        return ret
