@@ -70,4 +70,4 @@ class Validator:
             if valid:
                 module_type = 'hxb'
 
-        return module_type
+        return module_type, valid

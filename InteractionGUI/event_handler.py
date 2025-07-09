@@ -112,7 +112,7 @@ class GUIEventHandler:
         scanned_qr_code = values.get(qr_key, '')
         moduleserial = self.value_handler.format_moduleserial(scanned_qr_code)
 
-        module_type = self.validator.check_valid_module_serial(moduleserial)
+        module_type, _ = self.validator.check_valid_module_serial(moduleserial)
 
         if module_type == 'live':
             mod_statuses = ['Assembled', 'Backside Bonded', 'Backside Encapsulated',
@@ -192,7 +192,7 @@ class GUIEventHandler:
                 self.setup.update_test(key, test_name)
 
     def handle_back_to_base(self):
-        
+
         """ This function is only used for going from test selection page to the very test stands setup page.
         """
 
@@ -245,7 +245,7 @@ class GUIEventHandler:
                     moduleserial = self.value_handler.get_module_serial(teststand_no, module_no)
 
                     # check if the input is valid or not
-                    module_type= self.validator.check_valid_module_serial(moduleserial)
+                    module_type, valid = self.validator.check_valid_module_serial(moduleserial)
 
                     if valid:
                         self.manager.create_module(module_type, teststand_no, module_no)
