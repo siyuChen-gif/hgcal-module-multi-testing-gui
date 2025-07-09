@@ -85,7 +85,7 @@ class StateHandler:
         """Delete the placeholder element.
         """
         try:
-            self.window[key].Widget.pack_forget()
+            self.window[key].update(visible=False)
         except Exception as e:
             raise
     

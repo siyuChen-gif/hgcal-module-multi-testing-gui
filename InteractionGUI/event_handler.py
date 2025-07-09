@@ -215,6 +215,12 @@ class GUIEventHandler:
         # hide the test selection page
         self.setup.hide_tests_selection_setup()
 
+        #delete the previous test_selection_setup
+        self.setup.destroy_test_selection_setup()
+        
+        for key in self.setup.window.AllKeysDict:
+            print(key)
+
         # unhide the teststand setup page
         self.setup.show_teststands_setup()
 

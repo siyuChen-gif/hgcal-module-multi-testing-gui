@@ -81,6 +81,12 @@ class GUISetUp:
         self.state.add_element(self.tests_selection_layout_key, element)
     def delete_tests_selection_setup(self):
         self.state.delete_element(self.tests_selection_layout_key)
+    def destroy_test_selection_setup(self):
+        print(">>>>> try destroying...")
+        if self.tests_selection_layout_key in self.window.AllKeysDict:
+            self.window[self.tests_selection_layout_key].Widget.destroy()
+            del self.window.AllKeysDict[self.tests_selection_layout_key]
+            print(f">>>>>{self.tests_selection_layout_key} deleted")
     
     """ Functions for updating the default test for test selection section """
     def update_test(self, key, test):

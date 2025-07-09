@@ -91,7 +91,7 @@ GUI_LAYOUT = [GUI_HEAD,
               [switchable_layout],
               [sg.Text(key='-EXPAND-', font='ANY 1', pad=(0, 0))],
               [sg.Frame("STATUS",STATUSBAR, key="-statusbar_frame-"), sg.Button("Exit")],
-              [sg.Column([], key='-TESTS-SELECTION-LAYOUT-', visible=False, pad=(0, 0))]]
+]
 
 # layout for status
 # Set the initial colors and values of the status indicators
