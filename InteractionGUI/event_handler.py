@@ -4,12 +4,10 @@ import PySimpleGUI as sg
 from InteractionGUI.setup import GUISetUp
 from InteractionGUI.display import Display
 from InteractionGUI.value_handler import GUIValueHandler
-from InteractionGUI.status_handler import GUIStatusModel
+from InteractionGUI.validators import Validator
+from InteractionGUI.manager import ComponentManager
+from InteractionGUI.global_var import *
 
-# Constants:
-MAX_TESTSTAND_NUM = 8
-MAX_MODULE_NUM = 3
-DEBUG_MODE = True
 
 class GUIEventHandler:
     """
@@ -19,7 +17,8 @@ class GUIEventHandler:
         self.setup = GUISetUp(window)
         self.value_handler = GUIValueHandler(window)
         self.display = Display()
-        self.status = GUIStatusModel(window)
+        self.validator = Validator()
+        self.manager = ComponentManager()
 
         # The below function map is used to map the event name that does not have any patterns to the corresponding handler function.
         self.event_map = {
@@ -78,23 +77,15 @@ class GUIEventHandler:
 
     def handle_teststand_checkbox(self, event, values):
         """
-        checkbox key:           '-TESTSTAND-{teststand_no}-'
-        selected status key:    'is_selected'
+        teststand checkbox key: '-TESTSTAND-{teststand_no}-'
         """
         teststand_no, _ = self._get_no_from_event(event)
         is_checked = values.get(event, False)
 
         if is_checked:
             self.setup.enable_one_teststand(teststand_no)
-            self.status.update_status("is_selected", teststand_no)
-
-            fpgahostname = self.value_handler.get_fpgahostname(teststand_no)
-            self.status.update_value("fpgahostname", teststand_no, value=fpgahostname)
-            
         else:
             self.setup.disable_one_teststand(teststand_no)
-            self.status.update_status("is_selected", teststand_no, value=False)
-            self.status.update_value("fpgahostname", teststand_no)
 
     def handle_clear(self, event):
         """
@@ -121,20 +112,14 @@ class GUIEventHandler:
         scanned_qr_code = values.get(qr_key, '')
         moduleserial = self.value_handler.format_moduleserial(scanned_qr_code)
 
-        valid_state = self.value_handler.check_valid_module_serial(moduleserial)
-        if valid_state == 'invalid':
-            valid = False
-        else:
-            valid = True
-
         is_live = self.value_handler.check_is_live(moduleserial)
         is_hxb = self.value_handler.check_is_hxb(moduleserial)
 
-        if is_live and valid:
+        if is_live:
             mod_statuses = ['Assembled', 'Backside Bonded', 'Backside Encapsulated',
                             'Completely Bonded', 'Bonds Reworked', 'Completely Encapsulated', 'Bolted']
             self.setup.update_combo(combo_key, mod_statuses)
-        elif is_hxb and valid:
+        elif is_hxb:
             hxb_statuses = ['Untaped', 'Taped']
             self.setup.update_combo(combo_key, hxb_statuses)
         else:
@@ -144,18 +129,19 @@ class GUIEventHandler:
         """
         configure teststand button key: '-Configure-Test-Stand-'
         """
-        self.setup.disable_key("-Configure-Test-Stand-")
+        # only allow click once before finish configuration
+        self.setup.disable("-Configure-Test-Stand-")
 
         configured = True   # assert all teststands configured
 
         if DEBUG_MODE:
+            # May add validation here
             sleep(1)
         
         if configured:
-            self._update_temp_value_map()
+            self._update_components()
 
-            temp_value_maps = self.status.temp_value_maps
-
+            # let users know the configuration process is done
             end = self.display.waiting_window("Test stands configured.")
             sleep(1)
             end.close()
@@ -166,7 +152,7 @@ class GUIEventHandler:
             # display the testselection frame
             self.setup.delete_tests_selection_setup()   # remove the placeholder
 
-            TEST_SETUP_LAYOUT = self.display.setup_all_test_selection(temp_value_maps)
+            TEST_SETUP_LAYOUT = self.display.setup_all_test_selection(self.manager)
             
             # add the test selection frame to the window
             self.setup.add_tests_selection_setup(TEST_SETUP_LAYOUT)
@@ -175,10 +161,10 @@ class GUIEventHandler:
             self.setup.show_tests_selection_setup()
 
             # update the default test
-            self._update_default_test(temp_value_maps)
+            self._update_default_test()
 
             # enable the configuration setup button for future usage -> re-configure test stands
-            self.setup.enable_key("-Configure-Test-Stand-")
+            self.setup.enable("-Configure-Test-Stand-")
         
     def handle_popup_test_selection(self, event, values):
         """
@@ -240,45 +226,55 @@ class GUIEventHandler:
         
         return teststand_no, module_no
     
-    def _update_temp_value_map(self):
-        """Helper function for updating the temp_value_map for future usage.
+    def _update_components(self):
+        """Helper function for updating the value map for future usage.
+           - teststand checkbox key: '-TESTSTAND-{teststand_no}-'
+           - input box key:          '-Scanned-QR-Code-{teststand_no}-{module_no}-'
         """
+        # update and create the teststand in manager:
         for teststand_no in range(1, MAX_TESTSTAND_NUM+1):
-            is_selected = self.status.get_status("is_selected", teststand_no)
+            checkbox_key = f'-TESTSTAND-{teststand_no}-'
+            is_checked = self.setup.get_value(checkbox_key)
 
-            if is_selected:
+            if is_checked:
                 fpgahostname = self.value_handler.get_fpgahostname(teststand_no)
-                self.status.update_value("fpgahostname", teststand_no, value=fpgahostname)
+                self.manager.create_teststand(teststand_no)
+                self.manager.update_teststand_value(teststand_no, "fpgahostname", fpgahostname)
+                self.manager.update_teststand_status(teststand_no, "is_selected", True)
 
+                is_selected = self.manager.get_teststand_status(teststand_no, "is_selected")
+                print("teststand_no: ", teststand_no, "is_selected: ", is_selected)
+
+                # update and create the module in manager:
                 for module_no in range(1, MAX_MODULE_NUM+1):
                     moduleserial = self.value_handler.get_module_serial(teststand_no, module_no)
 
-                    if moduleserial != '':
-                        self.status.update_value("moduleserial", teststand_no, module_no, value=moduleserial)
-    
-    def _update_default_test(self, temp_value_maps):
+                    # check if the input is valid or not
+                    module_type, valid = self.validator.check_valid_module_serial(moduleserial)
+
+                    if valid:
+                        self.manager.create_module(module_type, teststand_no, module_no)
+                        self.manager.update_module_value(teststand_no, module_no, "moduleserial", moduleserial)
+
+    def _update_default_test(self):
         """Helper function for updating the default input.
            - test selection key:        "-TestSelection-{teststand_no}-{module_no}-"
            - test selection button key: "-TestSelectionButton-{teststand_no}-{module_no}-"
         """
         for teststand_no in range(1, MAX_TESTSTAND_NUM+1):
-            fpgahostname = self.status.get_value("fpgahostname", teststand_no)
+            ts = self.manager.get_teststand(teststand_no)
 
-            # if not fpgahostname:
-            #     for module_no in range(1, MAX_MODULE_NUM+1):
-            #         keys = [f"-TestSelection-{teststand_no}-{module_no}-", f"-TestSelectionButton-{teststand_no}-{module_no}-"]
-            #         for key in keys:
-            #             self.setup.disable_key(key)
-
-            if fpgahostname:
+            if ts:
                 for module_no in range(1, MAX_MODULE_NUM+1):
-                    moduleserial = self.value_handler.get_module_serial(teststand_no, module_no)
+                    module = self.manager.get_module(teststand_no, module_no)
 
-                    if moduleserial:
+                    if module:
+                        self.manager.update_module_value(teststand_no, module_no, 'selected_test', 'Standard Test Procedure')
+
                         key = f"-TestSelection-{teststand_no}-{module_no}-"
-                        test = "Standard Test Procedure"
-                        self.setup.update_test(key, test)
+                        self.setup.update_value(key, 'Standard Test Procedure')
+
                     else:
                         keys = [f"-TestSelection-{teststand_no}-{module_no}-", f"-TestSelectionButton-{teststand_no}-{module_no}-"]
                         for key in keys:
-                            self.setup.disable_key(key)
+                            self.setup.disable(key)

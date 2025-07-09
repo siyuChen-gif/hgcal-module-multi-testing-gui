@@ -1,12 +1,14 @@
 import re
 import PySimpleGUI as sg
-from InteractionGUI.state_handler import StateHandler
+from InteractionGUI.setup import StateHandler
+from InteractionGUI.validators import Validator
 
 class GUIValueHandler:
     def __init__(self, window):
         self.window = window
 
         self.state = StateHandler(self.window)
+        self.validator = Validator()
     
     # ============================================================
     # === Value recievers ========================================
@@ -67,32 +69,14 @@ class GUIValueHandler:
         
         return moduleserial
     
-    def check_valid_module_serial(self, moduleserial):
-        """Check if the module serial number is valid.
-        """
-        pattern = r'^320-([A-Z]{2})-([A-Z0-9]+)-([A-Z]{2})-(\d+)$'
-        match = re.match(pattern, moduleserial)
-
-        if not match:
-            return 'invalid'
-        
-        major_type = match.group(1)
-
-        if major_type.startswith('M'):
-            return 'module'
-        elif major_type.startswith('X'):
-            return 'hxb'
-        else:
-            return 'invalid'
-    
     def check_is_live(self, moduleserial):
         """Check if the module is live or not.
            - if live, return True
         """
-        status = self.check_valid_module_serial(moduleserial)
+        status, valid = self.validator.check_valid_module_serial(moduleserial)
         is_live = False
         
-        if status == 'module':
+        if status == 'live' and valid:
             is_live = True
 
         return is_live
@@ -101,10 +85,10 @@ class GUIValueHandler:
         """Check if the module is hxb or not.
            - if hxb, return True
         """
-        status = self.check_valid_module_serial(moduleserial)
+        status, valid = self.validator.check_valid_module_serial(moduleserial)
         is_hxb = False
 
-        if status == 'hxb':
+        if status == 'hxb' and valid:
             is_hxb = True
         
         return is_hxb

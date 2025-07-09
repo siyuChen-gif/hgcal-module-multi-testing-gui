@@ -2,6 +2,7 @@ import sys
 import PySimpleGUI as sg
 from time import sleep, time
 from InteractionGUI import Display
+from InteractionGUI.global_var import *
 from datetime import datetime, timedelta
 
 import yaml
@@ -10,14 +11,7 @@ import yaml
 This script stores all the layout information.
 """
 
-configuration = {}
-with open('./configuration.yaml', 'r') as file:
-    configuration = yaml.safe_load(file)
-
-DEBUG_MODE = configuration['DebugMode']
-
 # Create theme
-lgfont = ('Arial', 2*int(configuration['DefaultFontSize']))
 sg.set_options(font=("Arial", int(configuration['DefaultFontSize'])))
 
 cmured = '#C41230'
@@ -62,26 +56,19 @@ INSPECTOR = display_obj.setup_inspectors()
 GUI_HEAD = [[sg.Text("Multi-Module Testing GUI", font=lgfont, text_color=cmured)], 
              LOGO + INSPECTOR]
              
-# GUI_TESTSTANDS_LAYOUT = [sg.Column([[TESTSTANDS],
-#                          [sg.Checkbox("Debug Mode", key="-Debug-Mode-", default=DEBUG_MODE),
-#                          sg.Button("Select ALL"), 
-#                          sg.Button("De-Select ALL"),
-#                          sg.Push(),
-#                          sg.Button("Configure Test Stand", key="-Configure-Test-Stand-")]
-#                          ], key="-TESTSTANDS-LAYOUT-", visible=True)]
+GUI_TESTSTANDS_LAYOUT = sg.Column([[TESTSTANDS],
+                         [sg.Checkbox("Debug Mode", key="-Debug-Mode-", default=DEBUG_MODE),
+                         sg.Button("Select ALL"), 
+                         sg.Button("De-Select ALL"),
+                         sg.Push(),
+                         sg.Button("Configure Test Stand", key="-Configure-Test-Stand-")]
+                         ], key="-TESTSTANDS-LAYOUT-", visible=True)
 
 switchable_layout = [[
     sg.Column([
-        [sg.Column([
-            [TESTSTANDS],
-            [sg.Checkbox("Debug Mode", key="-Debug-Mode-", default=DEBUG_MODE),
-             sg.Button("Select ALL"),
-             sg.Button("De-Select ALL"),
-             sg.Push(),
-             sg.Button("Configure Test Stand", key="-Configure-Test-Stand-")]
-        ], key="-TESTSTANDS-LAYOUT-", visible=True),
+        [GUI_TESTSTANDS_LAYOUT,
 
-         sg.Column([], key="-TESTS-SELECTION-LAYOUT-", visible=False)
+         sg.Column([], key="-TESTS-SELECTION-LAYOUT-", visible=False)   # place holder
         ]
     ], pad=(0, 0), key='-SWITCHABLE-BLOCK-')
 ]]
@@ -90,8 +77,7 @@ switchable_layout = [[
 GUI_LAYOUT = [GUI_HEAD,
               [switchable_layout],
               [sg.Text(key='-EXPAND-', font='ANY 1', pad=(0, 0))],
-              [sg.Frame("STATUS",STATUSBAR, key="-statusbar_frame-"), sg.Button("Exit")],
-              [sg.Column([], key='-TESTS-SELECTION-LAYOUT-', visible=False, pad=(0, 0))]]
+              [sg.Frame("STATUS",STATUSBAR, key="-statusbar_frame-"), sg.Button("Exit")]]
 
 # layout for status
 # Set the initial colors and values of the status indicators
