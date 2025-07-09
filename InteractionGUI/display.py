@@ -1,23 +1,7 @@
-import yaml
 import PySimpleGUI as sg
 
-import os
-import sys
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from InteractionGUI.global_var import *
 
-"""
-This file contains the class that contain functions for displaying features to user.
-"""
-
-# Constants:
-MAX_TESTSTAND_NUM = 8
-MAX_MODULE_NUM = 3
-
-configuration = {}
-with open('./configuration.yaml', 'r') as file:
-    configuration = yaml.safe_load(file)
-
-lgfont = configuration['DefaultFontSize']
 
 class Display:
     def __init__(self):
@@ -239,7 +223,7 @@ class Display:
                             [sg.Text("DAQ Client: "), sg.Push(), self.LEDIndicator(key='-DAQ-Client-')]],key = "-status_sbcol5-frame-")
         
         return [[STATUS_SBCOL1, STATUS_SBCOL2, STATUS_SBCOL3, STATUS_SBCOL4, STATUS_SBCOL5]]
-    
+
 
     # ============================================================
     # === Tests Selection Display ================================
@@ -259,17 +243,17 @@ class Display:
                         'toa_vref_scan_noinj', 'toa_vref_scan', 'vref2D_scan', 'vrefinv_scan', 'vrefnoinv_scan']
         layout = [
             [sg.Text(f'Tests to run for Module {moduleserial}' if moduleserial else 'Tests to run:')],
-            [sg.Checkbox('Standard Test Procedure', key='-Standard-Test-', default=True), sg.Text('IV Max Voltage:'), sg.Input(s=5, key='-StandardIV-MaxV-')],
+            [sg.Checkbox('Standard Test Procedure', key='-Standard-Test-', default=True), sg.Text('IV Max Voltage:'), sg.Input(default_text=500, s=5, key='-StandardIV-MaxV-')],
             [sg.Checkbox('Trim Pedestals', key='-Trim-Pedestals-'), sg.Text('Bias Voltage:', key='-Bias-Voltage-PedTrim-Text-'), sg.Input(s=5, key='-Bias-Voltage-PedTrim-')],
             [sg.Checkbox('Pedestal Run', key='-Pedestal-Run-', enable_events=True), sg.Text('Number of tests:'), sg.Input(s=2, key='-N-Pedestals-', enable_events=True)],
             [sg.pin(sg.Column(BVonly, key='-BV-Menu-', visible=False))],
             [sg.Checkbox('Other Test Script:', key='-Other-Script-'), sg.Combo(other_scripts, key="-Other-Which-Script-"),
             sg.Text('Bias Voltage:', key='-Bias-Voltage-Other-Text-'), sg.Input(s=5, key='-Bias-Voltage-Other-')],
-            [sg.Checkbox('Ambient IV Curve', key='-Ambient-IV-'), sg.Text('Max V:'), sg.Input(s=5, key='-AmbIV-MaxV-')],
+            [sg.Checkbox('Ambient IV Curve', key='-Ambient-IV-'), sg.Text('Max V:'), sg.Input(default_text=500, s=5, key='-AmbIV-MaxV-')],
             [sg.Checkbox('Dry IV Curve', key='-Dry-IV-'), sg.Text('Number of tests:'), sg.Input(s=2, key='-N-Dry-IV-'),
             sg.Checkbox('Bias in Wait Period', key='-Dry-Wait-Bias-')],
             [sg.Text('Wait Periods (minutes):'), sg.Input(s=3, key='-DryIV-Wait-Time-1-'), sg.Input(s=3, key='-DryIV-Wait-Time-2-'),
-            sg.Input(s=3, key='-DryIV-Wait-Time-3-'), sg.Text('Max V:'), sg.Input(s=5, key='-DryIV-MaxV-')],
+            sg.Input(s=3, key='-DryIV-Wait-Time-3-'), sg.Text('Max V:'), sg.Input(default_text=500, s=5, key='-DryIV-MaxV-')],
             [sg.Button("Confirm", key='-CONFIRM-'), sg.Button("Cancel")]
         ]
 
@@ -312,12 +296,14 @@ class Display:
                 window.close()
                 return values, label_map
     
-    def setup_single_test_selection(self, teststand_no, temp_value_maps):
+    def setup_single_test_selection(self, manager, teststand_no):
         """Setup the single test selection for given teststand.
         """
-        fpgahostname = temp_value_maps[teststand_no]["teststand_values"]["fpgahostname"]
-        head = [sg.Push(), sg.Text(f"Teststand {teststand_no}: "), sg.Text(f"{fpgahostname}"), sg.Push()]
+        # get fpgahostname
+        fpgahostname = manager.get_teststand_value(teststand_no, 'fpgahostname')
 
+        # assign layout
+        head = [sg.Push(), sg.Text(f"Teststand {teststand_no}: "), sg.Text(f"{fpgahostname}"), sg.Push()]
         main_layout = [head]
 
         for module_no in range(1, MAX_MODULE_NUM+1):
@@ -332,22 +318,23 @@ class Display:
             row.append(sg.Button("Select Test", key=button_key))
 
             main_layout.append(row)
-        
+
         return sg.Frame('', main_layout, visible=True)
     
-    def setup_all_test_selection(self, temp_value_maps, is_vertical=False, MAX_COLUMNS=3):
+    def setup_all_test_selection(self, manager, is_vertical=False, MAX_COLUMNS=3):
         """Setup all test selections
         """
         all_test_selection_setup = []
         single_frames = []
 
         for teststand_no in range(1, MAX_TESTSTAND_NUM+1):
-            # single_test_selection_setup = self.setup_single_test_selection(teststand_no, temp_value_maps)
+            # single_test_selection_setup = self.setup_single_test_selection(teststand_no)
             # single_frames.append(single_test_selection_setup)
 
-            is_selected = temp_value_maps[teststand_no]["teststand_values"]["fpgahostname"]
+            is_selected = manager.get_teststand_status(teststand_no, 'is_selected')
+
             if is_selected:
-                single_test_selection_setup = self.setup_single_test_selection(teststand_no, temp_value_maps)
+                single_test_selection_setup = self.setup_single_test_selection(manager, teststand_no)
                 single_frames.append(single_test_selection_setup)
         
         single_frames.append(sg.Button("-Back-To-Base"))
@@ -355,7 +342,6 @@ class Display:
         all_test_selection_setup = self._assign_layout(single_frames, is_vertical, MAX_COLUMNS)
 
         return sg.Frame('Tests Selections', layout=all_test_selection_setup, key='-TESTS-SELECTION-LAYOUT-', visible=True)
-    
 
     def check_window(self, info: str):  # haven't test yet
         """
