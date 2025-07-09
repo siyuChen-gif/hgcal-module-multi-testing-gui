@@ -139,6 +139,10 @@ class GUIEventHandler:
             sleep(1)
         
         if configured:
+            # disable inspector
+            self.setup.disable("-INSPECTOR-")
+
+            # update the componets
             self._update_components()
 
             # let users know the configuration process is done
@@ -265,17 +269,23 @@ class GUIEventHandler:
         for teststand_no in range(1, MAX_TESTSTAND_NUM+1):
             ts = self.manager.get_teststand(teststand_no)
 
+            # check if teststand exist:
             if ts:
-                for module_no in range(1, MAX_MODULE_NUM+1):
-                    module = self.manager.get_module(teststand_no, module_no)
+                modules = self.manager.get_all_modules_in_ts(teststand_no)
 
-                    if module:
-                        self.manager.update_module_value(teststand_no, module_no, 'selected_test', 'Standard Test Procedure')
+                # check if there are modules in the teststands
+                if modules:
+                    for module_no in range(1, MAX_MODULE_NUM+1):
+                        module = self.manager.get_module(teststand_no, module_no)
 
-                        key = f"-TestSelection-{teststand_no}-{module_no}-"
-                        self.setup.update_value(key, 'Standard Test Procedure')
+                        if module:
+                            self.manager.update_module_value(teststand_no, module_no, 'selected_test', 'Standard Test Procedure')
 
-                    else:
-                        keys = [f"-TestSelection-{teststand_no}-{module_no}-", f"-TestSelectionButton-{teststand_no}-{module_no}-"]
-                        for key in keys:
-                            self.setup.disable(key)
+                            key = f"-TestSelection-{teststand_no}-{module_no}-"
+                            self.setup.update_value(key, 'Standard Test Procedure')
+
+                        # disable the empty input
+                        else: 
+                            keys = [f"-TestSelection-{teststand_no}-{module_no}-", f"-TestSelectionButton-{teststand_no}-{module_no}-"]
+                            for key in keys:
+                                self.setup.disable(key)

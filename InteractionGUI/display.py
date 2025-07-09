@@ -328,12 +328,12 @@ class Display:
         single_frames = []
 
         for teststand_no in range(1, MAX_TESTSTAND_NUM+1):
-            # single_test_selection_setup = self.setup_single_test_selection(teststand_no)
-            # single_frames.append(single_test_selection_setup)
-
+            # check if the teststand is selected and has modules
             is_selected = manager.get_teststand_status(teststand_no, 'is_selected')
+            modules = manager.get_all_modules_in_ts(teststand_no)
 
-            if is_selected:
+            # only show the teststands with modules
+            if is_selected and modules:
                 single_test_selection_setup = self.setup_single_test_selection(manager, teststand_no)
                 single_frames.append(single_test_selection_setup)
         
