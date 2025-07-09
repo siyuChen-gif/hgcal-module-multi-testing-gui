@@ -112,14 +112,17 @@ class GUIEventHandler:
         scanned_qr_code = values.get(qr_key, '')
         moduleserial = self.value_handler.format_moduleserial(scanned_qr_code)
 
-        is_live = self.value_handler.check_is_live(moduleserial)
-        is_hxb = self.value_handler.check_is_hxb(moduleserial)
+        print(moduleserial)
 
-        if is_live:
+        module_type, valid = self.validator.check_valid_module_serial(moduleserial)
+
+        print(module_type, valid)
+
+        if module_type == 'live':
             mod_statuses = ['Assembled', 'Backside Bonded', 'Backside Encapsulated',
                             'Completely Bonded', 'Bonds Reworked', 'Completely Encapsulated', 'Bolted']
             self.setup.update_combo(combo_key, mod_statuses)
-        elif is_hxb:
+        elif module_type == 'hxb':
             hxb_statuses = ['Untaped', 'Taped']
             self.setup.update_combo(combo_key, hxb_statuses)
         else:
@@ -129,13 +132,14 @@ class GUIEventHandler:
         """
         configure teststand button key: '-Configure-Test-Stand-'
         """
-        # only allow click once before finish configuration
+        # only allow click once before finishing configuration
         self.setup.disable("-Configure-Test-Stand-")
 
         configured = True   # assert all teststands configured
 
+        # Validation for All_Inputs
+
         if DEBUG_MODE:
-            # May add validation here
             sleep(1)
         
         if configured:
@@ -175,10 +179,8 @@ class GUIEventHandler:
         teststand_no, module_no = self._get_no_from_event(event)
 
         # get the module serial from the value map
-        moduleserial = self.status.get_value("moduleserial", teststand_no, module_no)
-
-        # get the module type:
-        module_type = self.value_handler.check_valid_module_serial(moduleserial)
+        moduleserial = self.manager.get_module_value(teststand_no, module_no, "moduleserial")
+        module_type = self.manager.get_module_value(teststand_no, module_no, "module_type")
 
         # display the pop up screen
         selected_test, label_map = self.display.setup_popup_test_selection(moduleserial, module_type)
@@ -186,7 +188,7 @@ class GUIEventHandler:
         for test, result in selected_test.items():
             if result:
                 # update the value map:
-                self.status.update_value("selected_test", teststand_no, module_no, value=test)
+                self.manager.update_module_value(teststand_no, module_no, "selected_test", value=test)
 
                 # update the displayed test name in GUI
                 key = f"-TestSelection-{teststand_no}-{module_no}-"
@@ -241,9 +243,6 @@ class GUIEventHandler:
                 self.manager.create_teststand(teststand_no)
                 self.manager.update_teststand_value(teststand_no, "fpgahostname", fpgahostname)
                 self.manager.update_teststand_status(teststand_no, "is_selected", True)
-
-                is_selected = self.manager.get_teststand_status(teststand_no, "is_selected")
-                print("teststand_no: ", teststand_no, "is_selected: ", is_selected)
 
                 # update and create the module in manager:
                 for module_no in range(1, MAX_MODULE_NUM+1):

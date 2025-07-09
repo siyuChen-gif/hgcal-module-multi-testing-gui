@@ -243,17 +243,17 @@ class Display:
                         'toa_vref_scan_noinj', 'toa_vref_scan', 'vref2D_scan', 'vrefinv_scan', 'vrefnoinv_scan']
         layout = [
             [sg.Text(f'Tests to run for Module {moduleserial}' if moduleserial else 'Tests to run:')],
-            [sg.Checkbox('Standard Test Procedure', key='-Standard-Test-', default=True), sg.Text('IV Max Voltage:'), sg.Input(s=5, key='-StandardIV-MaxV-')],
+            [sg.Checkbox('Standard Test Procedure', key='-Standard-Test-', default=True), sg.Text('IV Max Voltage:'), sg.Input(default_text=500, s=5, key='-StandardIV-MaxV-')],
             [sg.Checkbox('Trim Pedestals', key='-Trim-Pedestals-'), sg.Text('Bias Voltage:', key='-Bias-Voltage-PedTrim-Text-'), sg.Input(s=5, key='-Bias-Voltage-PedTrim-')],
             [sg.Checkbox('Pedestal Run', key='-Pedestal-Run-', enable_events=True), sg.Text('Number of tests:'), sg.Input(s=2, key='-N-Pedestals-', enable_events=True)],
             [sg.pin(sg.Column(BVonly, key='-BV-Menu-', visible=False))],
             [sg.Checkbox('Other Test Script:', key='-Other-Script-'), sg.Combo(other_scripts, key="-Other-Which-Script-"),
             sg.Text('Bias Voltage:', key='-Bias-Voltage-Other-Text-'), sg.Input(s=5, key='-Bias-Voltage-Other-')],
-            [sg.Checkbox('Ambient IV Curve', key='-Ambient-IV-'), sg.Text('Max V:'), sg.Input(s=5, key='-AmbIV-MaxV-')],
+            [sg.Checkbox('Ambient IV Curve', key='-Ambient-IV-'), sg.Text('Max V:'), sg.Input(default_text=500, s=5, key='-AmbIV-MaxV-')],
             [sg.Checkbox('Dry IV Curve', key='-Dry-IV-'), sg.Text('Number of tests:'), sg.Input(s=2, key='-N-Dry-IV-'),
             sg.Checkbox('Bias in Wait Period', key='-Dry-Wait-Bias-')],
             [sg.Text('Wait Periods (minutes):'), sg.Input(s=3, key='-DryIV-Wait-Time-1-'), sg.Input(s=3, key='-DryIV-Wait-Time-2-'),
-            sg.Input(s=3, key='-DryIV-Wait-Time-3-'), sg.Text('Max V:'), sg.Input(s=5, key='-DryIV-MaxV-')],
+            sg.Input(s=3, key='-DryIV-Wait-Time-3-'), sg.Text('Max V:'), sg.Input(default_text=500, s=5, key='-DryIV-MaxV-')],
             [sg.Button("Confirm", key='-CONFIRM-'), sg.Button("Cancel")]
         ]
 
@@ -301,7 +301,6 @@ class Display:
         """
         # get fpgahostname
         fpgahostname = manager.get_teststand_value(teststand_no, 'fpgahostname')
-        print("fpgahostname: ", fpgahostname)
 
         # assign layout
         head = [sg.Push(), sg.Text(f"Teststand {teststand_no}: "), sg.Text(f"{fpgahostname}"), sg.Push()]
@@ -319,9 +318,7 @@ class Display:
             row.append(sg.Button("Select Test", key=button_key))
 
             main_layout.append(row)
-        
-        print("main_layout:", main_layout)
-        
+
         return sg.Frame('', main_layout, visible=True)
     
     def setup_all_test_selection(self, manager, is_vertical=False, MAX_COLUMNS=3):
@@ -339,8 +336,6 @@ class Display:
             if is_selected:
                 single_test_selection_setup = self.setup_single_test_selection(manager, teststand_no)
                 single_frames.append(single_test_selection_setup)
-            
-        print("single_frames:", single_frames)
 
         all_test_selection_setup = self._assign_layout(single_frames, is_vertical, MAX_COLUMNS)
 
