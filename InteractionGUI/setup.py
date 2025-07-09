@@ -158,7 +158,7 @@ class GUISetUp(StateHandler):
     def add_tests_selection_setup(self, element):
         self.add_element(self.tests_selection_layout_key, element)
     def delete_tests_selection_setup(self):
-        self.state.delete_element(self.tests_selection_layout_key)
+        self.delete_element(self.tests_selection_layout_key)
     def destroy_test_selection_setup(self):
         print(">>>>> try destroying...")
         if self.tests_selection_layout_key in self.window.AllKeysDict:
