@@ -302,7 +302,7 @@ class Display:
             event, values = window.read()
             if event in (sg.WINDOW_CLOSED, 'Cancel'):
                 window.close()
-                return None   
+                return values, label_map
             elif event == '-CONFIRM-':
                 window.close()
                 return values, label_map
@@ -340,6 +340,8 @@ class Display:
             single_test_selection_setup = self.setup_single_test_selection(teststand_no, temp_value_maps)
             single_frames.append(single_test_selection_setup)
         
+        #single_frames.append(sg.Button("-Back-To-Base"))
+
         all_test_selection_setup = self._assign_layout(single_frames, is_vertical, MAX_COLUMNS)
 
         return sg.Frame('Tests Selections', layout=all_test_selection_setup, key='-TESTS-SELECTION-LAYOUT-', visible=True)
