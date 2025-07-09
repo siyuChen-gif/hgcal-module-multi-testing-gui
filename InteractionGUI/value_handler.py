@@ -63,33 +63,19 @@ class GUIValueHandler:
                     moduleserial = scannedcode[0:3]+'-'+scannedcode[3:5]+'-'+scannedcode[5:9]+'-'+scannedcode[9:11]+'-'+scannedcode[11:]
                 elif scannedcode[3] == 'X':
                     moduleserial = scannedcode[0:3]+'-'+scannedcode[3:5]+'-'+scannedcode[5:8]+'-'+scannedcode[8:10]+'-'+scannedcode[10:]
-
         else:
             moduleserial = scannedcode
         
         return moduleserial
     
-    def check_is_live(self, moduleserial):
-        """Check if the module is live or not.
-           - if live, return True
+    def unformat_moduleserial(self, moduleserial):
+        """Remove dashes from a formatted module serial number.
         """
-        status, valid = self.validator.check_valid_module_serial(moduleserial)
-        is_live = False
-        
-        if status == 'live' and valid:
-            is_live = True
+        scannedcode = ''
 
-        return is_live
-    
-    def check_is_hxb(self, moduleserial):
-        """Check if the module is hxb or not.
-           - if hxb, return True
-        """
-        status, valid = self.validator.check_valid_module_serial(moduleserial)
-        is_hxb = False
-
-        if status == 'hxb' and valid:
-            is_hxb = True
-        
-        return is_hxb
+        if isinstance(moduleserial, str) and '-' in moduleserial:
+            scannedcode = moduleserial.replace('-', '')
+        else:
+            scannedcode = moduleserial
+        return scannedcode
         
