@@ -245,7 +245,7 @@ class Display:
     # === Tests Selection Display ================================
     # ============================================================
 
-    def setup_popup_test_selection(self, moduleserial):
+    def setup_popup_test_selection(self, moduleserial, module_type):
         """Setup the popup test selection for given module serial.
         """
         # Select Tests fields only shown if able to bias the module
@@ -295,6 +295,11 @@ class Display:
             '-DryIV-MaxV-': 'Dry IV Curve'
         }
 
+        # label_map = {
+        #     'Standard Test Procedure': ['-Standard-Test-', '-StandardIV-MaxV-'],
+        #     'Trim Pedestals'
+        # }
+
         # Create the window
         window = sg.Window("Select Tests", layout, modal=True)
 
@@ -337,8 +342,13 @@ class Display:
         single_frames = []
 
         for teststand_no in range(1, MAX_TESTSTAND_NUM+1):
-            single_test_selection_setup = self.setup_single_test_selection(teststand_no, temp_value_maps)
-            single_frames.append(single_test_selection_setup)
+            # single_test_selection_setup = self.setup_single_test_selection(teststand_no, temp_value_maps)
+            # single_frames.append(single_test_selection_setup)
+
+            is_selected = temp_value_maps[teststand_no]["teststand_values"]["fpgahostname"]
+            if is_selected:
+                single_test_selection_setup = self.setup_single_test_selection(teststand_no, temp_value_maps)
+                single_frames.append(single_test_selection_setup)
         
         #single_frames.append(sg.Button("-Back-To-Base"))
 

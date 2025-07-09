@@ -176,6 +176,9 @@ class GUIEventHandler:
 
             # update the default test
             self._update_default_test(temp_value_maps)
+
+            # enable the configuration setup button for future usage -> re-configure test stands
+            self.setup.enable_key("-Configure-Test-Stand-")
         
     def handle_popup_test_selection(self, event, values):
         """
@@ -188,8 +191,11 @@ class GUIEventHandler:
         # get the module serial from the value map
         moduleserial = self.status.get_value("moduleserial", teststand_no, module_no)
 
+        # get the module type:
+        module_type = self.value_handler.check_valid_module_serial(moduleserial)
+
         # display the pop up screen
-        selected_test, label_map = self.display.setup_popup_test_selection(moduleserial)
+        selected_test, label_map = self.display.setup_popup_test_selection(moduleserial, module_type)
 
         for test, result in selected_test.items():
             if result:
@@ -258,11 +264,11 @@ class GUIEventHandler:
         for teststand_no in range(1, MAX_TESTSTAND_NUM+1):
             fpgahostname = self.status.get_value("fpgahostname", teststand_no)
 
-            if not fpgahostname:
-                for module_no in range(1, MAX_MODULE_NUM+1):
-                    keys = [f"-TestSelection-{teststand_no}-{module_no}-", f"-TestSelectionButton-{teststand_no}-{module_no}-"]
-                    for key in keys:
-                        self.setup.disable_key(key)
+            # if not fpgahostname:
+            #     for module_no in range(1, MAX_MODULE_NUM+1):
+            #         keys = [f"-TestSelection-{teststand_no}-{module_no}-", f"-TestSelectionButton-{teststand_no}-{module_no}-"]
+            #         for key in keys:
+            #             self.setup.disable_key(key)
 
             if fpgahostname:
                 for module_no in range(1, MAX_MODULE_NUM+1):
