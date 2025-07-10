@@ -25,6 +25,16 @@ class GUIValueHandler:
 
         return moduleserial
     
+    def get_module_status(self, teststand_no, module_no):
+        """Get the module status from the module status selection combo.
+           - module status selection key: '-ModuleStatus-{teststand_no}-{module_no}-'
+        """
+        key = f'-ModuleStatus-{teststand_no}-{module_no}-'
+
+        modulestatus = self.state.get_value(key)
+
+        return modulestatus
+    
     def get_fpgahostname(self, teststand_no):
         """Get the selected teststand IP address from the teststand IP selection section.
            - teststand ip selection key: "-FPGAHostname-{teststand_no}-"
@@ -45,6 +55,109 @@ class GUIValueHandler:
                 return fpgatype
             else:
                 raise NotImplementedError
+    
+    def get_selected_tests(self, values, teststand_no, module_no, manager):
+        """Get the selected tests from the test selection section.
+        """
+        tests_key_group = {
+            'standard_test': ['-Standard-Test-', '-StandardIV-MaxV-'],
+            'trim_pedestals': ['-Trim-Pedestals-', '-Bias-Voltage-PedTrim-'],
+            'pedestal_run': ['-Pedestal-Run-', '-N-Pedestals-'] + [f'-Bias-Voltage-Pedestal{no}-' for no in range(1, 7)],
+            'other_test': ['-Other-Script-', '-Other-Which-Script-'],
+            'ambient_iv_test': ['-Ambient-IV-', '-AmbIV-MaxV-'],
+            'dry_iv_test': ['-Dry-IV-', '-N-Dry-IV-', '-Dry-Wait-Bias-', '-DryIV-MaxV-'] + [f'-DryIV-Wait-Time-{no}-' for no in range(1, 4)],
+            'skip_test': ['-Skip-Test-']
+        }
+
+        # switch key and group mapping
+        key_to_group = {}
+        for group, keys in tests_key_group.items():
+            for k in keys:
+                key_to_group[k] = group
+
+        selected_tests = {}
+
+        for key, val in values.items():
+            if val in (None, False, '', []):
+                continue
+
+            group = key_to_group.get(key)
+            if not group:
+                continue
+
+            if group not in selected_tests:
+                selected_tests[group] = {}
+
+            # === handle each group of tests ===
+            if group == 'standard_test':
+                if key == '-StandardIV-MaxV-':
+                    try:
+                        selected_tests[group]['max_voltage'] = int(val)
+                    except ValueError:
+                        selected_tests[group]['max_voltage'] = None
+
+            elif group == 'trim_pedestals':
+                if key == '-Bias-Voltage-PedTrim-':
+                    try:
+                        selected_tests[group]['bias_voltage'] = int(val)
+                    except ValueError:
+                        selected_tests[group]['bias_voltage'] = None
+
+            elif group == 'pedestal_run':
+                if key == '-N-Pedestals-':
+                    try:
+                        selected_tests[group]['n_tests'] = int(val)
+                    except ValueError:
+                        selected_tests[group]['n_tests'] = None
+                elif key.startswith('-Bias-Voltage-Pedestal'):
+                    try:
+                        if 'bias_voltages' not in selected_tests[group]:
+                            selected_tests[group]['bias_voltages'] = [None]*6
+                        no = int(key.split('-')[-2])  # get the number
+                        selected_tests[group]['bias_voltages'][no - 1] = int(val)
+                    except:
+                        pass
+
+            elif group == 'other_test':
+                if key == '-Other-Which-Script-':
+                    selected_tests[group]['script_name'] = val
+
+            elif group == 'ambient_iv_test':
+                if key == '-AmbIV-MaxV-':
+                    try:
+                        selected_tests[group]['max_voltage'] = int(val)
+                    except ValueError:
+                        selected_tests[group]['max_voltage'] = None
+
+            elif group == 'dry_iv_test':
+                if key == '-N-Dry-IV-':
+                    try:
+                        selected_tests[group]['n_tests'] = int(val)
+                    except:
+                        selected_tests[group]['n_tests'] = None
+                elif key == '-Dry-Wait-Bias-':
+                    selected_tests[group]['bias_in_wait'] = bool(val)
+                elif key == '-DryIV-MaxV-':
+                    try:
+                        selected_tests[group]['max_voltage'] = int(val)
+                    except:
+                        selected_tests[group]['max_voltage'] = None
+                elif key.startswith('-DryIV-Wait-Time-'):
+                    try:
+                        if 'wait_times' not in selected_tests[group]:
+                            selected_tests[group]['wait_times'] = [None]*3
+                        no = int(key.split('-')[-2])
+                        selected_tests[group]['wait_times'][no - 1] = int(val)
+                    except:
+                        pass
+
+            elif group == 'skip_test':
+                selected_tests[group]['skip'] = True
+        
+        manager.update_module_value(teststand_no, module_no, 'selected_tests', selected_tests)
+
+        return selected_tests
+
 
 
     # ============================================================
@@ -77,5 +190,6 @@ class GUIValueHandler:
             scannedcode = moduleserial.replace('-', '')
         else:
             scannedcode = moduleserial
+
         return scannedcode
         

@@ -11,7 +11,14 @@ class StateHandler:
             self.window[key].update(value)
         except Exception as e:
             raise
-
+    
+    def update_checkbox(self, key, value):
+        """Update value of a GUI checkbox."""
+        try:
+            self.window[key].update(value)
+        except Exception as e:
+            raise
+        
     def update_combo(self, key, values):
         """Update the combo value of a GUI combo."""
         if values:
@@ -161,8 +168,16 @@ class GUISetUp(StateHandler):
         self.delete_element(self.tests_selection_layout_key)
     
     """ Functions for updating the default test for test selection section """
-    def update_test(self, key, test):
-        self.update_value(key, test)
+    def update_test(self, key, value):
+        self.update_value(key, value)
+    
+    """ Functions for setting visibility for keys """
+    def show_all_keys(self, keys):
+        for key in keys:
+            self.set_visibility(key, True)
+    def hide_all_keys(self, keys):
+        for key in keys:
+            self.set_visibility(key, False)
 
 
     # ============================================================

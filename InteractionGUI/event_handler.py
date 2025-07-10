@@ -55,7 +55,7 @@ class GUIEventHandler:
             self.handle_module_status_combo(event, values)
         
         elif event.startswith('-TestSelectionButton-'):
-            self.handle_popup_test_selection(event, values)
+            self.handle_popup_test_selection(event)
 
         """ More elifs here for future usage... """
     
@@ -177,7 +177,7 @@ class GUIEventHandler:
             # enable the configuration setup button for future usage -> re-configure test stands
             self.setup.enable("-Configure-Test-Stand-")
         
-    def handle_popup_test_selection(self, event, values):
+    def handle_popup_test_selection(self, event):
         """
         test selection key:        "-TestSelection-{teststand_no}-{module_no}-"
         test selection button key: "-TestSelectionButton-{teststand_no}-{module_no}-"
@@ -190,17 +190,10 @@ class GUIEventHandler:
         module_type = self.manager.get_module_value(teststand_no, module_no, "module_type")
 
         # display the pop up screen
-        selected_test, label_map = self.display.setup_popup_test_selection(moduleserial, module_type)
+        self.display.setup_popup_test_selection(teststand_no, module_no, self.manager)
 
-        for test, result in selected_test.items():
-            if result:
-                # update the value map:
-                self.manager.update_module_value(teststand_no, module_no, "selected_test", value=test)
-
-                # update the displayed test name in GUI
-                key = f"-TestSelection-{teststand_no}-{module_no}-"
-                test_name = label_map[test]
-                self.setup.update_test(key, test_name)
+        # update the selected test
+        self._update_selected_test(teststand_no, module_no, self.manager)
 
     def handle_back_to_base(self):
 
@@ -255,7 +248,8 @@ class GUIEventHandler:
 
                 # update and create the module in manager:
                 for module_no in range(1, MAX_MODULE_NUM+1):
-                    moduleserial = self.value_handler.get_module_serial(teststand_no, module_no)
+                    moduleserial    = self.value_handler.get_module_serial(teststand_no, module_no)
+                    module_status   = self.value_handler.get_module_status(teststand_no, module_no)
 
                     # check if the input is valid or not
                     module_type, valid = self.validator.check_valid_module_serial(moduleserial)
@@ -263,6 +257,7 @@ class GUIEventHandler:
                     if valid:
                         self.manager.create_module(module_type, teststand_no, module_no)
                         self.manager.update_module_value(teststand_no, module_no, "moduleserial", moduleserial)
+                        self.manager.update_module_value(teststand_no, module_no, "module_status", module_status)
 
     def _update_default_test(self):
         """Helper function for updating the default input.
@@ -292,3 +287,27 @@ class GUIEventHandler:
                             keys = [f"-TestSelection-{teststand_no}-{module_no}-", f"-TestSelectionButton-{teststand_no}-{module_no}-"]
                             for key in keys:
                                 self.setup.disable(key)
+                
+                # delete the teststand object if there's no module contains
+                else:
+                    self.manager.delete_teststand(teststand_no)
+    
+    def _update_selected_test(self, teststand_no, module_no, manager):
+        """Helper function for updating the selected test.
+           - test selection key: "-TestSelection-{teststand_no}-{module_no}-"
+        """
+        key = f"-TestSelection-{teststand_no}-{module_no}-"
+
+        selected_test = manager.get_module_value(teststand_no, module_no,'selected_tests')
+        test_count = 0
+        test_list = []
+
+        for test, test_info in selected_test.items():
+            if test_info:
+                test_count += 1
+                test_list.append(test)
+        
+        if test_count == 1:
+            self.setup.update_value(key, test_list[0])
+        else:
+            self.setup.update_value(key, 'Multiple Tests')
