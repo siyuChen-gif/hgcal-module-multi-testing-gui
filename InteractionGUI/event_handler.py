@@ -277,10 +277,11 @@ class GUIEventHandler:
                         module = self.manager.get_module(teststand_no, module_no)
 
                         if module:
-                            self.manager.update_module_value(teststand_no, module_no, 'selected_test', 'Standard Test Procedure')
+                            value = {'standard_test': {'enabled': True, 'max_voltage': 500}}
+                            self.manager.update_module_value(teststand_no, module_no, 'selected_tests', value)
 
                             key = f"-TestSelection-{teststand_no}-{module_no}-"
-                            self.setup.update_value(key, 'Standard Test Procedure')
+                            self.setup.update_value(key, 'standard_test')
 
                         # disable the empty input
                         else: 

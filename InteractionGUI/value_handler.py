@@ -55,7 +55,7 @@ class GUIValueHandler:
                 return fpgatype
             else:
                 raise NotImplementedError
-    
+
     def get_selected_tests(self, values, teststand_no, module_no, manager):
         """Get the selected tests from the test selection section.
         """
@@ -75,88 +75,98 @@ class GUIValueHandler:
             for k in keys:
                 key_to_group[k] = group
 
-        selected_tests = {}
+        selected_tests = manager.get_module_value(teststand_no, module_no,'selected_tests')
+        print(selected_tests)
 
-        for key, val in values.items():
-            if val in (None, False, '', []):
+        # loop over the group
+        for group, keys in tests_key_group.items():
+            checkbox_key = keys[0]  # assert checkbox key is the first
+
+            if not values.get(checkbox_key, False):
+                try:
+                    del selected_tests[group]
+                except KeyError:
+                    pass
                 continue
 
-            group = key_to_group.get(key)
-            if not group:
-                continue
+            selected_tests[group] = {}  # initiallize the group
 
-            if group not in selected_tests:
-                selected_tests[group] = {}
+            # loop through all keys in the grop
+            for key in keys[1:]:
+                val = values.get(key)
 
-            # === handle each group of tests ===
-            if group == 'standard_test':
-                if key == '-StandardIV-MaxV-':
+                # handle each group of tests
+                if group == 'standard_test' and key == '-StandardIV-MaxV-':
                     try:
                         selected_tests[group]['max_voltage'] = int(val)
-                    except ValueError:
+                    except (ValueError, TypeError):
                         selected_tests[group]['max_voltage'] = None
 
-            elif group == 'trim_pedestals':
-                if key == '-Bias-Voltage-PedTrim-':
+                elif group == 'trim_pedestals' and key == '-Bias-Voltage-PedTrim-':
                     try:
                         selected_tests[group]['bias_voltage'] = int(val)
-                    except ValueError:
+                    except (ValueError, TypeError):
                         selected_tests[group]['bias_voltage'] = None
 
-            elif group == 'pedestal_run':
-                if key == '-N-Pedestals-':
-                    try:
-                        selected_tests[group]['n_tests'] = int(val)
-                    except ValueError:
-                        selected_tests[group]['n_tests'] = None
-                elif key.startswith('-Bias-Voltage-Pedestal'):
-                    try:
-                        if 'bias_voltages' not in selected_tests[group]:
-                            selected_tests[group]['bias_voltages'] = [None]*6
-                        no = int(key.split('-')[-2])  # get the number
-                        selected_tests[group]['bias_voltages'][no - 1] = int(val)
-                    except:
-                        pass
+                elif group == 'pedestal_run':
+                    if key == '-N-Pedestals-':
+                        try:
+                            selected_tests[group]['n_tests'] = int(val)
+                        except (ValueError, TypeError):
+                            selected_tests[group]['n_tests'] = None
+                    elif key.startswith('-Bias-Voltage-Pedestal'):
+                        try:
+                            if 'bias_voltages' not in selected_tests[group]:
+                                selected_tests[group]['bias_voltages'] = [None] * 6
+                            no = int(key.split('-')[-2])
+                            selected_tests[group]['bias_voltages'][no - 1] = int(val)
+                        except:
+                            pass
 
-            elif group == 'other_test':
-                if key == '-Other-Which-Script-':
+                elif group == 'other_test' and key == '-Other-Which-Script-':
                     selected_tests[group]['script_name'] = val
 
-            elif group == 'ambient_iv_test':
-                if key == '-AmbIV-MaxV-':
+                elif group == 'ambient_iv_test' and key == '-AmbIV-MaxV-':
                     try:
                         selected_tests[group]['max_voltage'] = int(val)
-                    except ValueError:
+                    except (ValueError, TypeError):
                         selected_tests[group]['max_voltage'] = None
 
-            elif group == 'dry_iv_test':
-                if key == '-N-Dry-IV-':
-                    try:
-                        selected_tests[group]['n_tests'] = int(val)
-                    except:
-                        selected_tests[group]['n_tests'] = None
-                elif key == '-Dry-Wait-Bias-':
-                    selected_tests[group]['bias_in_wait'] = bool(val)
-                elif key == '-DryIV-MaxV-':
-                    try:
-                        selected_tests[group]['max_voltage'] = int(val)
-                    except:
-                        selected_tests[group]['max_voltage'] = None
-                elif key.startswith('-DryIV-Wait-Time-'):
-                    try:
-                        if 'wait_times' not in selected_tests[group]:
-                            selected_tests[group]['wait_times'] = [None]*3
-                        no = int(key.split('-')[-2])
-                        selected_tests[group]['wait_times'][no - 1] = int(val)
-                    except:
-                        pass
+                elif group == 'dry_iv_test':
+                    if key == '-N-Dry-IV-':
+                        try:
+                            selected_tests[group]['n_tests'] = int(val)
+                        except:
+                            selected_tests[group]['n_tests'] = None
+                    elif key == '-Dry-Wait-Bias-':
+                        selected_tests[group]['bias_in_wait'] = bool(val)
+                    elif key == '-DryIV-MaxV-':
+                        try:
+                            selected_tests[group]['max_voltage'] = int(val)
+                        except:
+                            selected_tests[group]['max_voltage'] = None
+                    elif key.startswith('-DryIV-Wait-Time-'):
+                        try:
+                            if 'wait_times' not in selected_tests[group]:
+                                selected_tests[group]['wait_times'] = [None] * 3
+                            no = int(key.split('-')[-2])
+                            selected_tests[group]['wait_times'][no - 1] = int(val)
+                        except:
+                            pass
 
-            elif group == 'skip_test':
-                selected_tests[group]['skip'] = True
-        
+                elif group == 'skip_test':
+                    selected_tests[group]['skip'] = True
+
+        # if skip is selected, only keep the skip
+        if selected_tests.get('skip_test', {}).get('skip'):
+            selected_tests = {
+                'skip_test': selected_tests['skip_test']
+            }
+
         manager.update_module_value(teststand_no, module_no, 'selected_tests', selected_tests)
 
         return selected_tests
+            
 
 
 
