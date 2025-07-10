@@ -20,6 +20,9 @@ class GUIEventHandler:
         self.validator = Validator()
         self.manager = ComponentManager()
 
+        # count of going back to the base window
+        self.back_to_base_num = 0
+
         # The below function map is used to map the event name that does not have any patterns to the corresponding handler function.
         self.event_map = {
             "Select ALL": self.handle_enable_all,
@@ -157,9 +160,13 @@ class GUIEventHandler:
             self.setup.delete_tests_selection_setup()   # remove the placeholder
 
             TEST_SETUP_LAYOUT = self.display.setup_all_test_selection(self.manager)
-            
-            # add the test selection frame to the window
-            self.setup.add_tests_selection_setup(TEST_SETUP_LAYOUT)
+
+            if self.back_to_base_num == 0:
+                FRAME_LAYOUT = sg.Frame('Tests Selections', layout=TEST_SETUP_LAYOUT, key=self.setup.tests_selection_layout_key, visible=True)
+                # add the test selection frame to the window
+                self.setup.add_tests_selection_setup(FRAME_LAYOUT)
+            else:
+                self.setup.update_value(self.setup.tests_selection_layout_key,TEST_SETUP_LAYOUT)
 
             # show the frame
             self.setup.show_tests_selection_setup()
@@ -203,11 +210,7 @@ class GUIEventHandler:
         # hide the test selection page
         self.setup.hide_tests_selection_setup()
 
-        #delete the previous test_selection_setup
-        self.setup.destroy_test_selection_setup()
-        
-        for key in self.setup.window.AllKeysDict:
-            print(key)
+        self.back_to_base_num += 1
 
         # unhide the teststand setup page
         self.setup.show_teststands_setup()

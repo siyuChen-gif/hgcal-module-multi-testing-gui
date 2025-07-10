@@ -337,11 +337,11 @@ class Display:
                 single_test_selection_setup = self.setup_single_test_selection(manager, teststand_no)
                 single_frames.append(single_test_selection_setup)
         
-        single_frames.append(sg.Button("-Back-To-Base"))
+        single_frames.append(sg.Button("Go Back To Last Page", key="-Back-To-Base"))
 
         all_test_selection_setup = self._assign_layout(single_frames, is_vertical, MAX_COLUMNS)
 
-        return sg.Frame('Tests Selections', layout=all_test_selection_setup, key='-TESTS-SELECTION-LAYOUT-', visible=True)
+        return all_test_selection_setup
 
     def check_window(self, info: str):  # haven't test yet
         """
