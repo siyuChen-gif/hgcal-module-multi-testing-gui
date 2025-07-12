@@ -76,7 +76,6 @@ class GUIValueHandler:
                 key_to_group[k] = group
 
         selected_tests = manager.get_module_value(teststand_no, module_no,'selected_tests')
-        print(selected_tests)
 
         # loop over the group
         for group, keys in tests_key_group.items():
@@ -158,9 +157,15 @@ class GUIValueHandler:
                     selected_tests[group]['skip'] = True
 
         # if skip is selected, only keep the skip
-        if selected_tests.get('skip_test', {}).get('skip'):
+        if values.get('-Skip-Test-', False):
             selected_tests = {
-                'skip_test': selected_tests['skip_test']
+                'skip_test': {'skip': True}
+            }
+        
+        # if selected test is empty, auto update to skip the test:
+        if not selected_tests:
+            selected_tests = {
+                'skip_test': {'skip': True}
             }
 
         manager.update_module_value(teststand_no, module_no, 'selected_tests', selected_tests)
