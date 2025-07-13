@@ -5,7 +5,30 @@ from InteractionGUI.global_var import *
 
 class Display:
     def __init__(self):
-        pass
+        # Select Tests fields only shown if able to bias the module
+        self.BVonly = [[sg.Text('Bias Voltage (per run): '),
+                sg.Input(s=5, key='-Bias-Voltage-Pedestal1-'), sg.Input(s=5, key='-Bias-Voltage-Pedestal2-'),
+                sg.Input(s=5, key='-Bias-Voltage-Pedestal3-'), sg.Input(s=5, key='-Bias-Voltage-Pedestal4-'),
+                sg.Input(s=5, key='-Bias-Voltage-Pedestal5-'), sg.Input(s=5, key='-Bias-Voltage-Pedestal6-')]]
+
+        # Select Tests section
+        self.other_scripts = ['pedestal_scan', 'delay_scan', 'injection_scan', 'phase_scan', 'sampling_scan', 'toa_trim_scan', 
+                        'toa_vref_scan_noinj', 'toa_vref_scan', 'vref2D_scan', 'vrefinv_scan', 'vrefnoinv_scan']
+        self.layout = [
+            [sg.Text(f'Tests to run:', key='-Tests-Text-')],
+            [sg.Checkbox('Standard Test Procedure', key='-Standard-Test-'), sg.Text('IV Max Voltage:'), sg.Input(default_text=500, s=5, key='-StandardIV-MaxV-')],
+            [sg.Checkbox('Trim Pedestals', key='-Trim-Pedestals-'), sg.Text('Bias Voltage:', key='-Bias-Voltage-PedTrim-Text-'), sg.Input(default_text=300, s=5, key='-Bias-Voltage-PedTrim-')],
+            [sg.Checkbox('Pedestal Run', key='-Pedestal-Run-', enable_events=True), sg.Text('Number of tests:'), sg.Input(s=2, key='-N-Pedestals-', enable_events=True)],
+            [sg.pin(sg.Column(self.BVonly, key='-BV-Menu-', visible=True))],
+            [sg.Checkbox('Other Test Script:', key='-Other-Script-'), sg.Combo(self.other_scripts, key='-Other-Which-Script-')],
+            [sg.Checkbox('Ambient IV Curve', key='-Ambient-IV-'), sg.Text('Max V:'), sg.Input(default_text=500, s=5, key='-AmbIV-MaxV-')],
+            [sg.Checkbox('Dry IV Curve', key='-Dry-IV-'), sg.Text('Number of tests:'), sg.Input(s=2, key='-N-Dry-IV-'),
+            sg.Checkbox('Bias in Wait Period', key='-Dry-Wait-Bias-')],
+            [sg.Text('Wait Periods (minutes):'), sg.Input(s=3, key='-DryIV-Wait-Time-1-'), sg.Input(s=3, key='-DryIV-Wait-Time-2-'),
+            sg.Input(s=3, key='-DryIV-Wait-Time-3-'), sg.Text('Max V:'), sg.Input(default_text=500, s=5, key='-DryIV-MaxV-')],
+            [sg.Checkbox('Skip the test', key='-Skip-Test-')],
+            [sg.Button("Confirm", key='-CONFIRM-'), sg.Button("Cancel")]
+        ]
 
     # ============================================================
     # === Windows Display ========================================
@@ -232,33 +255,8 @@ class Display:
     def setup_popup_test_selection(self, teststand_no, module_no, manager):
         """Setup the popup test selection for given module serial.
         """
-        # Select Tests fields only shown if able to bias the module
-        BVonly = [[sg.Text('Bias Voltage (per run): '),
-                sg.Input(s=5, key='-Bias-Voltage-Pedestal1-'), sg.Input(s=5, key='-Bias-Voltage-Pedestal2-'),
-                sg.Input(s=5, key='-Bias-Voltage-Pedestal3-'), sg.Input(s=5, key='-Bias-Voltage-Pedestal4-'),
-                sg.Input(s=5, key='-Bias-Voltage-Pedestal5-'), sg.Input(s=5, key='-Bias-Voltage-Pedestal6-')]]
-
-        # Select Tests section
-        other_scripts = ['pedestal_scan', 'delay_scan', 'injection_scan', 'phase_scan', 'sampling_scan', 'toa_trim_scan', 
-                        'toa_vref_scan_noinj', 'toa_vref_scan', 'vref2D_scan', 'vrefinv_scan', 'vrefnoinv_scan']
-        layout = [
-            [sg.Text(f'Tests to run:', key='-Tests-Text-')],
-            [sg.Checkbox('Standard Test Procedure', key='-Standard-Test-'), sg.Text('IV Max Voltage:'), sg.Input(default_text=500, s=5, key='-StandardIV-MaxV-')],
-            [sg.Checkbox('Trim Pedestals', key='-Trim-Pedestals-'), sg.Text('Bias Voltage:', key='-Bias-Voltage-PedTrim-Text-'), sg.Input(default_text=300, s=5, key='-Bias-Voltage-PedTrim-')],
-            [sg.Checkbox('Pedestal Run', key='-Pedestal-Run-', enable_events=True), sg.Text('Number of tests:'), sg.Input(s=2, key='-N-Pedestals-', enable_events=True)],
-            [sg.pin(sg.Column(BVonly, key='-BV-Menu-', visible=True))],
-            [sg.Checkbox('Other Test Script:', key='-Other-Script-'), sg.Combo(other_scripts, key='-Other-Which-Script-')],
-            [sg.Checkbox('Ambient IV Curve', key='-Ambient-IV-'), sg.Text('Max V:'), sg.Input(default_text=500, s=5, key='-AmbIV-MaxV-')],
-            [sg.Checkbox('Dry IV Curve', key='-Dry-IV-'), sg.Text('Number of tests:'), sg.Input(s=2, key='-N-Dry-IV-'),
-            sg.Checkbox('Bias in Wait Period', key='-Dry-Wait-Bias-')],
-            [sg.Text('Wait Periods (minutes):'), sg.Input(s=3, key='-DryIV-Wait-Time-1-'), sg.Input(s=3, key='-DryIV-Wait-Time-2-'),
-            sg.Input(s=3, key='-DryIV-Wait-Time-3-'), sg.Text('Max V:'), sg.Input(default_text=500, s=5, key='-DryIV-MaxV-')],
-            [sg.Checkbox('Skip the test', key='-Skip-Test-')],
-            [sg.Button("Confirm", key='-CONFIRM-'), sg.Button("Cancel")]
-        ]
-
         # Create the window
-        window = sg.Window("Select Tests", layout, modal=True, finalize=True, resizable=True, return_keyboard_events=True)
+        window = sg.Window("Select Tests", self.layout, modal=True, finalize=True, resizable=True, return_keyboard_events=True)
 
         # import needed classes
         from InteractionGUI.setup import GUISetUp
